@@ -132,7 +132,12 @@ public class App extends Application {
 
         stage.setMaximized(Settings.BOO_STAGE_MAXIMIZED);
         stage.setScene(SCENE);
+        
         stage.setTitle(Settings.STR_APP_TITLE);
+        if (Settings.IMG_APP_ICON != null) {
+            stage.getIcons().add(Settings.IMG_APP_ICON);
+        }
+
         stage.show();
         LOGGER.debug("### Started APP.");
     }

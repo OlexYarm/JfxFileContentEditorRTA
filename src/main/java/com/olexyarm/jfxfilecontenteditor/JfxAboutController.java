@@ -37,25 +37,38 @@ public class JfxAboutController implements Initializable {
 
         LOGGER.debug("### JfxAboutController initialize.");
 
+        //gridPaneAbout.setGridLinesVisible(true);
+        Double dblFontSizeCurrent = Settings.getFontSizeDefault();
+        gridPaneAbout.setStyle("-fx-font: Normal " + dblFontSizeCurrent + " Arial;");
+
         int intRowIndex = 0;
         Label lblAppNameValue = new Label(Settings.STR_APP_TITLE);
-        lblAppNameValue.setStyle("-fx-font: NORMAL 15 Tahoma;");
+        lblAppNameValue.setStyle("-fx-font: BOLD " + (dblFontSizeCurrent + 1) + " Arial;");
         gridPaneAbout.add(lblAppNameValue, 0, intRowIndex, 2, 1);
 
+        Label lblVersion = new Label("Version:");
+        gridPaneAbout.add(lblVersion, 0, ++intRowIndex);
         Label lblVersionValue = new Label(Settings.STR_VERSION);
-        gridPaneAbout.add(lblVersionValue, 0, ++intRowIndex, 2, 1);
+        gridPaneAbout.add(lblVersionValue, 1, intRowIndex);
 
+        Label lblBuild = new Label("Build.date:");
+        gridPaneAbout.add(lblBuild, 0, ++intRowIndex);
         Label lblBuildValue = new Label(Settings.STR_BUILD_TIME);
-        gridPaneAbout.add(lblBuildValue, 0, ++intRowIndex, 2, 1);
+        gridPaneAbout.add(lblBuildValue, 1, intRowIndex);
 
-        Label lblBuildJavaHome = new Label(Settings.STR_BUILD_JAVA_HOME);
-        gridPaneAbout.add(lblBuildJavaHome, 0, ++intRowIndex, 2, 1);
+        Label lblBuildJavaHome = new Label("Build.JavaHome:");
+        gridPaneAbout.add(lblBuildJavaHome, 0, ++intRowIndex);
+        Label lblBuildJavaHomeValue = new Label(Settings.STR_BUILD_JAVA_HOME);
+        gridPaneAbout.add(lblBuildJavaHomeValue, 1, intRowIndex);
 
-        Label lblBuildOs = new Label(Settings.STR_BUILD_OS);
-        gridPaneAbout.add(lblBuildOs, 0, ++intRowIndex, 2, 1);
+        Label lblBuildOs = new Label("Build.OS:");
+        gridPaneAbout.add(lblBuildOs, 0, ++intRowIndex);
+        Label lblBuildOsValue = new Label(Settings.STR_BUILD_OS);
+        gridPaneAbout.add(lblBuildOsValue, 1, intRowIndex);
 
         ++intRowIndex;
         Label lblRuntime = new Label("Current Enviroment");
+        lblRuntime.setStyle("-fx-font: BOLD " + (dblFontSizeCurrent + 1) + " Arial;");
         gridPaneAbout.add(lblRuntime, 0, ++intRowIndex, 2, 1);
 
         Label lblOS = new Label("OS:");
@@ -81,18 +94,19 @@ public class JfxAboutController implements Initializable {
         gridPaneAbout.add(lblAutor, 0, ++intRowIndex);
         Label lblAuthorValue = new Label("Oleksandr Yarmolenko");
         gridPaneAbout.add(lblAuthorValue, 1, intRowIndex);
+        Label lblAuthorEmail = new Label("(olexyarm@outlook.com)");
+        gridPaneAbout.add(lblAuthorEmail, 1, ++intRowIndex);
 
-        intRowIndex += 2;
         Label lblIcons = new Label("Icons by:");
         gridPaneAbout.add(lblIcons, 0, ++intRowIndex);
         Label lblIconsValue = new Label("https://icons8.com/");
         gridPaneAbout.add(lblIconsValue, 1, intRowIndex);
 
         LOGGER.info("### JfxEditorAbout. "
-                + Settings.STR_VERSION
-                + Settings.STR_BUILD_TIME
-                + Settings.STR_BUILD_OS
-                + Settings.STR_BUILD_JAVA_HOME
+                + " Version=\"" + Settings.STR_VERSION
+                + " Builddate=\"" + Settings.STR_BUILD_TIME
+                + " BuildOS=\"" + Settings.STR_BUILD_OS
+                + " BuilsJavaHome=\"" + Settings.STR_BUILD_JAVA_HOME
                 + " CurrentOS=\"" + Settings.osName() + "\""
                 + " CurrentJavaVersion=" + Settings.javaVersion()
                 + " CurrentJavaFXVersion=" + Settings.javafxVersion());

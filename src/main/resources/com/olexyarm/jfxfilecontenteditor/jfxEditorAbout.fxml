@@ -14,7 +14,7 @@
     
     <GridPane fx:id="gridPaneAbout" vgap="5" hgap="5" alignment="center" xmlns:fx="http://javafx.com/fxml">
         <padding>
-            <Insets top="10" right="20" bottom="10" left="20"/>
+            <Insets top="10" right="10" bottom="10" left="10"/>
         </padding>
     </GridPane>
 

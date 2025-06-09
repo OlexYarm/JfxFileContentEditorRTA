@@ -42,6 +42,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.awt.Dimension;
 import java.util.Arrays;
+import javafx.scene.image.Image;
 
 public class Settings {
 
@@ -57,29 +58,40 @@ public class Settings {
 
     private static final String STR_VERSION_FILENAME = "version.txt";
 
+    private static final String STR_APP_ICON_FILENAME = "img/icons8-editor-64.png";
+    public static Image IMG_APP_ICON;
+
     static {
         try (InputStream is = Settings.class.getResourceAsStream(STR_VERSION_FILENAME); BufferedReader br = new BufferedReader(new InputStreamReader(is))) {
             String strLine;
             int intLineCount = 0;
             while ((strLine = br.readLine()) != null) {
                 intLineCount++;
-                if (strLine.startsWith("Build.version")) {
-                    STR_VERSION = strLine;
-                } else if (strLine.startsWith("Build.date")) {
-                    STR_BUILD_TIME = strLine;
-                } else if (strLine.startsWith("Build.JavaHome")) {
-                    STR_BUILD_JAVA_HOME = strLine;
-                } else if (strLine.startsWith("Build.OS")) {
-                    STR_BUILD_OS = strLine;
-                } else {
-                    LOGGER.info("Unknown line in Version file."
-                            + " VersionFileName=\"" + STR_VERSION_FILENAME + "\""
-                            + " LineNumber=" + intLineCount
-                            + " Line=\"" + strLine + "\""
-                    );
+                if (strLine == null || strLine.isEmpty()) {
+                    continue;
+                }
+                int intPos = strLine.indexOf(":");
+                if (intPos > 0) {
+                    intPos++;
+                    String strValue = strLine.substring(intPos);
+                    if (strLine.startsWith("Build.version")) {
+                        STR_VERSION = strValue;
+                    } else if (strLine.startsWith("Build.date")) {
+                        STR_BUILD_TIME = strValue;
+                    } else if (strLine.startsWith("Build.JavaHome")) {
+                        STR_BUILD_JAVA_HOME = strValue;
+                    } else if (strLine.startsWith("Build.OS")) {
+                        STR_BUILD_OS = strValue;
+                    } else {
+                        LOGGER.error("Unknown line in Version file."
+                                + " VersionFileName=\"" + STR_VERSION_FILENAME + "\""
+                                + " LineNumber=" + intLineCount
+                                + " Line=\"" + strLine + "\""
+                        );
+                    }
                 }
             }
-            LOGGER.info("Parsed Version file."
+            LOGGER.debug("Parsed Version file."
                     + " VersionFileName=\"" + STR_VERSION_FILENAME + "\""
                     + " STR_VERSION=\"" + STR_VERSION + "\""
                     + " STR_BUILD_TIME=\"" + STR_BUILD_TIME + "\""
@@ -94,6 +106,23 @@ public class Settings {
                     + " VersionFilePath=\"" + STR_VERSION_FILENAME + "\""
                     + " Throwable=\"" + t.toString() + "\"");
         }
+
+        try (InputStream is = Settings.class.getResourceAsStream(STR_APP_ICON_FILENAME);) {
+            if (is != null) {
+                IMG_APP_ICON = new Image(is);
+            } else {
+                IMG_APP_ICON = null;
+            }
+        } catch (IOException ex) {
+            LOGGER.error("Could not read App Icon file."
+                    + " APP_ICON_FILENAME=\"" + STR_APP_ICON_FILENAME + "\""
+                    + " IOException=\"" + ex.toString() + "\"");
+        } catch (Throwable t) {
+            LOGGER.error("Could not read App Icon file."
+                    + " APP_ICON_FILENAME=\"" + STR_APP_ICON_FILENAME + "\""
+                    + " Throwable=\"" + t.toString() + "\"");
+        }
+
     }
 
     // -------------------------------------------------------------------------------------
@@ -147,8 +176,8 @@ public class Settings {
 
     // -------------------------------------------------------------------------------------
     // Window About
-    public static final int INT_WINDOW_ABOUT_WIDTH = 350;
-    public static final int INT_WINDOW_ABOUT_HIGH = 300;
+    public static final int INT_WINDOW_ABOUT_WIDTH = 450;
+    public static final int INT_WINDOW_ABOUT_HIGH = 350;
 
     // -------------------------------------------------------------------------------------
     // Window Settings
