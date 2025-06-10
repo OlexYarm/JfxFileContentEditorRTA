@@ -177,10 +177,10 @@ public class Utils {
             while ((strLine = reader.readLine()) != null) {
                 intLineNumber++;
                 lstOpenTabs.add(strLine);
-                LOGGER.debug("Read Opened Tab from file."
-                        + " path=\"" + path + "\""
-                        + " intLineNumber=\"" + intLineNumber + "\""
-                        + " strLine=\"" + strLine + "\"");
+                LOGGER.debug("Restored Tab."
+                        + " LineNumber=\"" + intLineNumber + "\""
+                        + " strLine=\"" + strLine + "\""
+                        + " path=\"" + path + "\"");
             }
         } catch (Throwable t) {
             LOGGER.error("Could not read OpenTabs file."

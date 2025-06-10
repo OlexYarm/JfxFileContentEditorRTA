@@ -187,9 +187,6 @@ public class JfxFileContentEditorMenuController {
     private Button buttonFontDecrease;
 
     // -------------------------------------------------------------------------------------
-    //    @FXML
-    //    private ToolBar tbFont;
-    // -------------------------------------------------------------------------------------
     private TabPane tabPane;
     private ObservableList<Tab> lstTabs;
 
@@ -332,7 +329,9 @@ public class JfxFileContentEditorMenuController {
                 + " jfxEditorBottom=\"" + jfxEditorBottom + "\""
         );
 
-        Settings.load();
+        if (Settings.getLogLevel() == null) {
+            Settings.load();
+        }
         this.addMenuFontFamily();
         this.addMenuCharset();
         this.addFavorites();

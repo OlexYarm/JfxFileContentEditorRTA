@@ -16,6 +16,7 @@ package com.olexyarm.jfxfilecontenteditor;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.TabPane;
+import javafx.scene.control.TabPane.TabDragPolicy;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
@@ -23,26 +24,26 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class JfxFileContentEditorController {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(JfxFileContentEditorController.class);
     
+    private static final Logger LOGGER = LoggerFactory.getLogger(JfxFileContentEditorController.class);
+
     // -------------------------------------------------------------------------------------
     @FXML
     public JfxFileContentEditorMenuController jfxEditorMenuController;
-
+    
     @FXML
     public JfxFileContentEditorBottomController jfxEditorBottomController;
 
     // -------------------------------------------------------------------------------------
     @FXML
     public BorderPane borderPaneEditor;
-
+    
     @FXML
     public HBox jfxEditorMenu;
-
+    
     @FXML
     public TabPane tabPaneEditor;
-
+    
     @FXML
     public VBox jfxEditorBottom;
 
@@ -51,11 +52,15 @@ public class JfxFileContentEditorController {
     // -------------------------------------------------------------------------------------
     @FXML
     public void initialize() {
-
+        
+        tabPaneEditor.setTabDragPolicy(TabDragPolicy.REORDER);
+        TabDragPolicy tabDragPolicy = tabPaneEditor.getTabDragPolicy();
+        
         LOGGER.debug("### Initialize JfxFileContentEditorController."
                 + " borderPaneEditor=\"" + borderPaneEditor + "\""
                 + " jfxEditorMenu=\"" + jfxEditorMenu + "\""
                 + " tabPaneEditor=\"" + tabPaneEditor + "\""
+                + " tabDragPolicy=\"" + tabDragPolicy + "\""
                 + " jfxEditorBottom=\"" + jfxEditorBottom + "\""
                 + " jfxEditorMenuController=\"" + jfxEditorMenuController + "\""
                 + " jfxEditorBottomController=\"" + jfxEditorBottomController + "\""

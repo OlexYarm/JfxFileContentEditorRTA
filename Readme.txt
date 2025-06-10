@@ -1,6 +1,6 @@
 The project is improved version of my JavaFX minimalistic text editor (https://github.com/OlexYarm/JfxFileContentEditor).
 I added a few useful features, and fixed major problem - switched from TextArea to RichTextArea control (it's currently jfx-incubator-richtext).
-So, it should be no still limit on file size, highlighting for selection, and line numbers ...
+So, it should be no limit on file size, highlighting for selection, and line numbers ...
 
 1) Overview
 The editor has all minimum and necessary features for editing test files small/medium size:

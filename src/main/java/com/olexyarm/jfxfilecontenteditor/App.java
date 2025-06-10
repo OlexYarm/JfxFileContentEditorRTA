@@ -47,6 +47,8 @@ public class App extends Application {
     @Override
     public void start(Stage stage) throws IOException {
 
+        Settings.load();
+
         LOGGER.debug("### Creating Scene.");
 
         FXMLLoader fxmlLoader = Utils.loadFXML("jfxFileContentEditor");
@@ -132,7 +134,7 @@ public class App extends Application {
 
         stage.setMaximized(Settings.BOO_STAGE_MAXIMIZED);
         stage.setScene(SCENE);
-        
+
         stage.setTitle(Settings.STR_APP_TITLE);
         if (Settings.IMG_APP_ICON != null) {
             stage.getIcons().add(Settings.IMG_APP_ICON);

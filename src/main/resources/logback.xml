@@ -2,15 +2,15 @@
 
     <appender name="Console-Appender" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
-            <pattern>%date{yyyy-MM-dd'T'HH:mm:ss.SSSZ} LEVEL=%p, MSG=%m%ex{10}, %class:%method%n</pattern>
+            <pattern>%date{yyyy-MM-dd'T'HH:mm:ss.SSSZ} %p %m%ex{10}, %class:%method%n</pattern>
         </encoder>
     </appender>
 
     <appender name="App-File-Appender" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>logs/jfxFileContentEditor.log</file>
+        <file>logs/jfxEditor.log</file>
 
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
-            <fileNamePattern>logs/archived/jfxFileContentEditor.%d{yyyy-MM-dd}.%i.log.gz</fileNamePattern>
+            <fileNamePattern>logs/archived/jfxEditor.%d{yyyy-MM-dd}.%i.log.gz</fileNamePattern>
             <!-- each archived file, size max 10MB -->
             <maxFileSize>10MB</maxFileSize>
             <!-- total size of all archive files, if total size > 20GB, it will delete old archived file -->
@@ -20,7 +20,7 @@
         </rollingPolicy>
 
         <encoder>
-            <pattern>%date{yyyy-MM-dd'T'HH:mm:ss.SSSZ} LEVEL=%p,MSG=%m%ex{10}, %class:%method%n</pattern>
+            <pattern>%date{yyyy-MM-dd'T'HH:mm:ss.SSSZ} %p %m%ex{10}, %class:%method%n</pattern>
         </encoder>
     </appender>
 

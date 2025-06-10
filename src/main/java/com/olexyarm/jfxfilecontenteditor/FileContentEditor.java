@@ -52,7 +52,6 @@ import javafx.geometry.Insets;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.TabPane;
-import javafx.scene.control.TextArea;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
@@ -70,7 +69,6 @@ import org.slf4j.LoggerFactory;
 public class FileContentEditor extends VBox {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FileContentEditor.class);
-    private static final int INT_PROGRESS_BAR_STEPS = 20;
     private static final byte BYT_CR = 0x0D;
     private static final byte BYT_LF = 0x0A;
     private static final String STR_CR_LF_WIN = "Win CRLF";
@@ -102,8 +100,6 @@ public class FileContentEditor extends VBox {
     private final RichTextArea richTextArea = new RichTextArea(model);
     private StyleAttributeMap mapStyleAttrFont;
 
-    private final TextArea textArea = new TextArea();
-
     private final HBox hboxState;
     private final Label lblFileState;
     private final Label lblFileName;
@@ -112,6 +108,7 @@ public class FileContentEditor extends VBox {
     private Task<String> taskFileLoad;
 
     private Service<String> serviceFileSave;
+    private static final int INT_PROGRESS_BAR_STEPS = 20;
     private static final int INT_FILE_LEN_SPLIT = 10;
     private int intFileSaveCount = 0;
 
@@ -360,9 +357,9 @@ public class FileContentEditor extends VBox {
                 int intProgressStep = intFileSize / INT_PROGRESS_BAR_STEPS;
                 LOGGER.debug("Loading file."
                         + " Id=\"" + strId + "\""
-                        + " intFileSize=" + intFileSize
-                        + " pathFile=\"" + pathFile + "\""
-                        + " intProgressStep=" + intProgressStep);
+                        + " FileSize=" + intFileSize
+                        + " ProgressStep=" + intProgressStep
+                        + " pathFile=\"" + pathFile + "\"");
 
                 int intProgressCounter = 1;
                 long lngBytesReadTotal = 0;
@@ -596,7 +593,7 @@ public class FileContentEditor extends VBox {
                     return new Task<String>() {
                         @Override
                         protected String call() throws InterruptedException {
-                            LOGGER.debug("Service File Save started."
+                            LOGGER.debug("Service: File Save started."
                                     + " pathFile=\"" + pathFile + "\"");
                             updateMessage("File Save started.");
 
@@ -607,16 +604,16 @@ public class FileContentEditor extends VBox {
                             if (intParagraphCount == 0) {
                                 strText = "";
                                 strComment = " empty file";
-                                LOGGER.debug("Service Fle saving empty file."
+                                LOGGER.debug("Service: Fle saving empty file."
                                         + " pathFile=\"" + pathFile + "\"");
                             } else {
                                 strText = richTextArea.getPlainText(intParagraphToSave);
                             }
                             Charset charset = Charset.forName(strCharsetName);
-                            LOGGER.info("Service File saving" + strComment + "."
+                            LOGGER.info("Service: File saving" + strComment + "."
                                     + " Id=\"" + strId + "\""
-                                    + " intParagraphCount=" + intParagraphCount
-                                    + " intParagraphToSave=" + intParagraphToSave
+                                    + " ParagraphCount=" + intParagraphCount
+                                    + " ParagraphToSave=" + intParagraphToSave
                                     + " charset=\"" + charset + "\""
                                     + " pathFile=\"" + pathFile + "\"");
                             int intParagraphsSaved = 0;
@@ -627,8 +624,10 @@ public class FileContentEditor extends VBox {
                             try (BufferedWriter writer = Files.newBufferedWriter(pathFile, charset)) {
                                 while (true) {
                                     intTextLen = strText.length();
+                                    //SaveParagraph(writer, strText);
+                                    writer.write(strText, 0, intTextLen);
                                     lngCharsWroteTotal += intTextLen;
-                                    SaveParagraph(writer, strText);
+                                    intParagraphsSaved++;
                                     if (enuLineEndType.equals(enuLineEnding.Win)) {
                                         writer.write(BYT_CR);
                                         writer.write(BYT_LF);
@@ -638,14 +637,13 @@ public class FileContentEditor extends VBox {
                                         writer.write(BYT_CR);
                                         writer.write(BYT_LF);
                                     }
-                                    intParagraphsSaved++;
                                     if (intParagraphsSaved > intParagraphStep) {
                                         intParagraphStep += intParagraphStepDelta;
-                                        LOGGER.info("Service File saving Paragraph."
-                                                + " intParagraphCountSaved=" + intParagraphsSaved
-                                                + " intTextLen=" + intTextLen
-                                                + " lngCharsWroteTotal=" + lngCharsWroteTotal);
-                                        updateProgress(intParagraphStep, intParagraphCount);
+                                        LOGGER.info("Service: File saving Paragraph."
+                                                + " ParagraphCountSaved=" + intParagraphsSaved
+                                                + " TextLen=" + intTextLen
+                                                + " CharsWroteTotal=" + lngCharsWroteTotal);
+                                        updateProgress(intParagraphsSaved, intParagraphCount);
                                         updateMessage("File Saving " + " lines=" + intParagraphsSaved + " chars=" + lngCharsWroteTotal);
                                     }
                                     if (intParagraphsSaved >= intParagraphCount) {
@@ -668,8 +666,9 @@ public class FileContentEditor extends VBox {
                                 LOGGER.error(strMsg);
                                 return strMsg;
                             }
-                            updateProgress(intTextLen, intTextLen);
-                            String strMsg = "File Save finished (" + intTextLen + " bytes).";
+                            updateProgress(intParagraphsSaved, intParagraphCount);
+                            String strMsg = "File Save finished ("
+                                    + intParagraphsSaved + " lines, " + lngCharsWroteTotal + " chars" + ").";
                             updateMessage(strMsg);
                             LOGGER.debug(strMsg + " pathFile=\"" + pathFile + "\"");
                             intFileSaveCount++;
@@ -677,7 +676,7 @@ public class FileContentEditor extends VBox {
                         }
 
                         boolean SaveParagraph(BufferedWriter writer, String strText) throws IOException {
-
+                            // Not in use now, could be used only for very long paragraphs.
                             int intTextLen;
                             if (strText == null) {
                                 intTextLen = 0;
@@ -685,42 +684,42 @@ public class FileContentEditor extends VBox {
                                 intTextLen = strText.length();
                             }
 
-                            int intStep;
+                            int intSteps;
                             if (intTextLen < INT_FILE_LEN_SPLIT) {
-                                intStep = 0;
+                                intSteps = 0;
                             } else {
-                                intStep = intTextLen / INT_PROGRESS_BAR_STEPS;
+                                intSteps = intTextLen / INT_PROGRESS_BAR_STEPS;
                             }
-                            LOGGER.debug("Service Saving file."
+                            LOGGER.debug("Service: Saving file."
                                     + " Id=\"" + strId + "\""
-                                    + " intLen=" + intTextLen
-                                    + " intStep=" + intStep
+                                    + " Len=" + intTextLen
+                                    + " Steps=" + intSteps
                                     + " pathFile=\"" + pathFile + "\"");
                             int intFrom = 0;
                             //try (BufferedWriter writer = Files.newBufferedWriter(pathFile, charset)) {
-                            if (intStep == 0) {
+                            if (intSteps == 0) {
                                 writer.write(strText, 0, intTextLen);
-                                LOGGER.debug("Saving paragraph."
+                                LOGGER.debug("Saving whole paragraph."
                                         + " Id=\"" + strId + "\""
-                                        + " intLen=" + intTextLen
-                                        + " intFrom=" + intFrom
+                                        + " Len=" + intTextLen
+                                        + " From=" + intFrom
                                         + " pathFile=\"" + pathFile + "\"");
                             } else {
                                 int intProgressCounter = 0;
                                 long lngBytesWriteTotal = 0;
-                                while (intFrom <= intTextLen - intStep) {
+                                while (intFrom <= intTextLen - intSteps) {
                                     intProgressCounter++;
-                                    writer.write(strText, intFrom, intStep);
-                                    intFrom += intStep;
-                                    lngBytesWriteTotal += intStep;
+                                    writer.write(strText, intFrom, intSteps);
+                                    intFrom += intSteps;
+                                    lngBytesWriteTotal += intSteps;
                                     updateProgress(intFrom, intTextLen);
                                     updateMessage("File Saving " + " step=" + intProgressCounter + " bytes=" + lngBytesWriteTotal);
 
                                     LOGGER.debug("Saving file."
                                             + " Id=\"" + strId + "\""
-                                            + " pathFile=\"" + pathFile + "\""
-                                            + " intProgressCounter=" + intProgressCounter
-                                            + " intFrom=" + intFrom);
+                                            + " ProgressCounter=" + intProgressCounter
+                                            + " From=" + intFrom
+                                            + " pathFile=\"" + pathFile + "\"");
                                     /* 
                                         // For testing only !
                                         try {
@@ -1050,7 +1049,7 @@ public class FileContentEditor extends VBox {
                 strFileNameExt = this.strFileName.substring(intFileNameExtPos + 1);
             }
             this.strFileExt = strFileNameExt;
-            LOGGER.info("Parsed File."
+            LOGGER.debug("Parsed FilePath."
                     + " Id=\"" + strId + "\""
                     + " FilePath=\"" + this.pathFile + "(" + this.strFilePath + ")\""
                     + " FileNamePos=\"" + intFileNamePos + "\""
