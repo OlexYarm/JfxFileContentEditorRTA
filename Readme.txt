@@ -51,8 +51,13 @@ or on Windows run bat-file
 
 jfxEditor.bat
 
-The editor will create directory "...\JfxEditor" in user's home directory with files "Settings.properties" and "Favorites.txt" in it.
-The editor will create directory "...\jfxEditor\bin\logs" with log files in it.
+The bat-file will open new window with Java runtime in it and additional window with Editor. Both windows will be open and visible until the editor is closed.
+To prevent showing window with Java runtime the bat-file should be edited as below:
+rem "%DIR%\java" %JLINK_VM_OPTIONS% -m com.olexyarm.jfxfilecontenteditor/com.olexyarm.jfxfilecontenteditor.App %*
+start javaw  %JLINK_VM_OPTIONS% -m com.olexyarm.jfxfilecontenteditor/com.olexyarm.jfxfilecontenteditor.App %*
+
+When started the editor will create directory "...\JfxEditor" in user's home directory with files "Settings.properties" and "Favorites.txt" in it.
+The editor will also create directory "...\jfxEditor\bin\logs" with log files in it.
 Log files will be rolled out and Zip compressed daily. The Zip archive files will be deleted after 60 days.
 
 3.4) Build modular jar file from command-line using Maven

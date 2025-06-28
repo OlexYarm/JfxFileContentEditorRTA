@@ -493,7 +493,6 @@ public class JfxFileContentEditorMenuController {
     }
 
     // -------------------------------------------------------------------------------------
-    // -------------------------------------------------------------------------------------
     private boolean openFileinTab(Path pathFile) {
 
         if (!Utils.checkNewTabsAllowed(this.lstTabs)) {
@@ -586,7 +585,6 @@ public class JfxFileContentEditorMenuController {
         }
 
         FileChooser fileChooser = new FileChooser();
-        // TODO: Use last open directory and keep it in Settings.
         fileChooser.setInitialDirectory(new File(Settings.getLastOpenedDir()));
         fileChooser.setTitle("Select a file to open");
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("*.*", "*.*"));
@@ -671,6 +669,7 @@ public class JfxFileContentEditorMenuController {
             strFilePathAs = fileEditor.getFilePath();
             Tooltip tltp = tab.getTooltip();
             tltp.setText(strFilePathAs);
+            Settings.setLastOpenedDir(strFilePathAs);
         }
     }
 

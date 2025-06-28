@@ -155,11 +155,6 @@ public class FileContentEditor extends VBox {
 
         VBox.setVgrow(this.richTextArea, Priority.ALWAYS);
 
-        /* switch to richTextArea
-        this.textArea.setPromptText("Enter Text here.");
-        this.textArea.setFont(this.font);
-        VBox.setVgrow(this.textArea, Priority.ALWAYS);
-         */
         this.hboxState = new HBox();
         Insets insHboxPadd = new Insets(5, 5, 5, 20);
         this.hboxState.setPadding(insHboxPadd);
@@ -173,7 +168,7 @@ public class FileContentEditor extends VBox {
         this.hboxState.getChildren().addAll(this.lblFileName, this.progressBar, this.lblFileState);
         this.hboxState.managedProperty().bind(this.hboxState.visibleProperty());
 
-        this.getChildren().addAll(this.richTextArea, this.hboxState);// switch to richTextArea
+        this.getChildren().addAll(this.richTextArea, this.hboxState);
 
         Insets insVboxPadd = new Insets(5, 5, 5, 5);
         this.setPadding(insVboxPadd);
@@ -1352,6 +1347,7 @@ public class FileContentEditor extends VBox {
 
                     richTextArea.insertText(TextPos.ZERO, strText, mapStyleAttrFont);
                     richTextArea.setWrapText(booTextWrap);
+                    richTextArea.select(TextPos.ZERO);
 
                     richTextArea.getModel().addListener(stmChangeListenerFileContent);
 
