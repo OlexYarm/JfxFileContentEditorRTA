@@ -56,6 +56,7 @@ import javafx.scene.control.TabPane;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToolBar;
 import javafx.scene.control.Tooltip;
+import javafx.scene.input.Clipboard;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
@@ -501,7 +502,7 @@ public class JfxFileContentEditorMenuController {
 
         String strErrMsg = Utils.checkFileExist("openFileinTab", pathFile);
         if (strErrMsg != null && !strErrMsg.isBlank()) {
-            Utils.showMessage(AlertType.ERROR, "Opening File", "", "File \"" + pathFile + "\" does not exist.", null, null);
+            Utils.showMessage(AlertType.ERROR, "Opening File", "", "File does not exist:\n" + pathFile, null, null);
             return false;
         }
 
@@ -645,7 +646,7 @@ public class JfxFileContentEditorMenuController {
             fileChooser.setInitialDirectory(new File(Settings.STR_DIRECTORY_USER_HOME_PATH));
         }
 
-        File fileSaveAs = fileChooser.showSaveDialog(null);
+        File fileSaveAs = fileChooser.showSaveDialog(this.borderPaneEditor.getScene().getWindow());
         if (fileSaveAs == null) {
             LOGGER.info("Saving file As canceled."
                     + " TabId=\"" + strTabId + "\""
@@ -769,9 +770,21 @@ public class JfxFileContentEditorMenuController {
         node = (HBox) Utils.MAP_NODE_REFS.get(Utils.NODE_NAMES.hboxBottomFind.toString());
         node.setVisible(true);
 
-        TextField tfFind = (TextField) Utils.MAP_NODE_REFS.get(Utils.NODE_NAMES.tfBottomFind.toString());
+        TextField tfFind = fillFindFieldFromClipboard();
         tfFind.requestFocus();
         tfFind.positionCaret(0);
+    }
+
+    private TextField fillFindFieldFromClipboard() {
+
+        TextField tfFind = (TextField) Utils.MAP_NODE_REFS.get(Utils.NODE_NAMES.tfBottomFind.toString());
+        String strTextToSearch = "";
+        Clipboard clipboard = Clipboard.getSystemClipboard();
+        if (clipboard.hasString()) {
+            strTextToSearch = clipboard.getString();
+        }
+        tfFind.setText(strTextToSearch);
+        return tfFind;
     }
 
     // -------------------------------------------------------------------------------------
@@ -793,6 +806,8 @@ public class JfxFileContentEditorMenuController {
 
         node = (HBox) Utils.MAP_NODE_REFS.get(Utils.NODE_NAMES.hboxBottomReplace.toString());
         node.setVisible(true);
+
+        TextField tfFind = fillFindFieldFromClipboard();
 
         TextField tfReplace = (TextField) Utils.MAP_NODE_REFS.get(Utils.NODE_NAMES.tfBottomReplace.toString());
         tfReplace.requestFocus();

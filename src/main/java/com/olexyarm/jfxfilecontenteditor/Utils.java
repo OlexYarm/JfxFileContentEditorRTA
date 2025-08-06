@@ -35,6 +35,7 @@ import javafx.scene.Node;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.DialogPane;
 import javafx.scene.control.Tab;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -530,21 +531,40 @@ public class Utils {
     public static boolean showMessage(Alert.AlertType alertType, String strTitle, String strHeader, String strMessage,
             String strButtonTextYes, String strButtonTextNo) {
 
-        ButtonType btYes = new ButtonType(strButtonTextYes, ButtonBar.ButtonData.OK_DONE);
-        ButtonType btNo = new ButtonType(strButtonTextNo, ButtonBar.ButtonData.CANCEL_CLOSE);
+        if (strTitle == null) {
+            strTitle = "";
+        }
+        int intTitleLen = strTitle.length();
+        if (strHeader == null) {
+            strHeader = "";
+        }
+        int intHeaderLen = strHeader.length();
+        if (strMessage == null) {
+            strMessage = "";
+        }
+        int intMsgLen = strMessage.length();
+        ButtonType btYes = null;
 
         Alert alert = new Alert(alertType);
         alert.setTitle(strTitle);
         alert.setHeaderText(strHeader);
         alert.setContentText(strMessage);
-        //int intBtCount=alert.getButtonTypes().size();
+        int intMaxLen = Math.max(intTitleLen, intHeaderLen);
+        intMaxLen = Math.max(intMaxLen, intMsgLen);
+        if (intMaxLen > 0) {
+            DialogPane dialogPane = alert.getDialogPane();
+            dialogPane.setPrefWidth(intMaxLen * 7);
+        }
+
         if ((strButtonTextYes != null && !strButtonTextYes.isEmpty()) || (strButtonTextNo != null && !strButtonTextNo.isEmpty())) {
             alert.getButtonTypes().clear();
         }
         if (strButtonTextYes != null && !strButtonTextYes.isEmpty()) {
+            btYes = new ButtonType(strButtonTextYes, ButtonBar.ButtonData.OK_DONE);
             alert.getButtonTypes().add(btYes);
         }
         if (strButtonTextNo != null && !strButtonTextNo.isEmpty()) {
+            ButtonType btNo = new ButtonType(strButtonTextNo, ButtonBar.ButtonData.CANCEL_CLOSE);
             alert.getButtonTypes().add(btNo);
         }
         LOGGER.debug("Show Alert."
@@ -554,7 +574,7 @@ public class Utils {
 
         boolean booReturn = false;
         Optional<ButtonType> result = alert.showAndWait();
-        if (result.orElse(btYes) == btYes) {
+        if (btYes != null && result.orElse(btYes) == btYes) {
             LOGGER.debug("Alert response Yes."
                     + " Title=\"" + strTitle + "\""
                     + " Header=\"" + strHeader + "\""

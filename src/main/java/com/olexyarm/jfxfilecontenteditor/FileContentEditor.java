@@ -52,11 +52,13 @@ import javafx.geometry.Insets;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.TabPane;
+import javafx.scene.input.Clipboard;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
+import jfx.incubator.scene.control.input.FunctionTag;
 import jfx.incubator.scene.control.richtext.LineNumberDecorator;
 import jfx.incubator.scene.control.richtext.RichTextArea;
 import jfx.incubator.scene.control.richtext.TextPos;
@@ -152,6 +154,10 @@ public class FileContentEditor extends VBox {
         this.richTextArea.setEditable(true);
         this.richTextArea.setManaged(true);
         this.richTextArea.requestFocus();
+
+        richTextArea.getInputMap().registerFunction(RichTextArea.Tag.PASTE, () -> {
+            richTextArea.pastePlainText();
+        });
 
         VBox.setVgrow(this.richTextArea, Priority.ALWAYS);
 
