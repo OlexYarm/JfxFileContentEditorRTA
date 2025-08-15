@@ -52,13 +52,11 @@ import javafx.geometry.Insets;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.TabPane;
-import javafx.scene.input.Clipboard;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
-import jfx.incubator.scene.control.input.FunctionTag;
 import jfx.incubator.scene.control.richtext.LineNumberDecorator;
 import jfx.incubator.scene.control.richtext.RichTextArea;
 import jfx.incubator.scene.control.richtext.TextPos;
@@ -188,7 +186,7 @@ public class FileContentEditor extends VBox {
             public void changed(ObservableValue<? extends TextPos> observable, TextPos oldValue, TextPos newValue) {
                 hboxState.setVisible(false);
                 textPosCaretPosition = newValue;
-                LOGGER.debug("caretPositionChangeListener."
+                LOGGER.trace("textPosCaretPositionChangeListener."
                         + " Id=\"" + strId + "\""
                         + " FileName=\"" + strFileName + "\""
                         + " observable=" + observable
@@ -226,7 +224,7 @@ public class FileContentEditor extends VBox {
             @Override
             public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
                 hboxState.setVisible(false);
-                LOGGER.debug("focusedPropertyChangeListener."
+                LOGGER.trace("focusedPropertyChangeListener."
                         + " Id=\"" + strId + "\""
                         + " FileName=\"" + strFileName + "\""
                         + " textPosCaretPosition=" + textPosCaretPosition
@@ -1020,9 +1018,7 @@ public class FileContentEditor extends VBox {
     }
 
     // -------------------------------------------------------------------------------------
-    // Helpers
-    // -------------------------------------------------------------------------------------
-    private void parseFilePath(final String strId, Path pathFile) {
+    public void parseFilePath(final String strId, Path pathFile) {
 
         if (pathFile == null) {
             this.strFilePath = "";
@@ -1061,6 +1057,8 @@ public class FileContentEditor extends VBox {
         }
     }
 
+    // -------------------------------------------------------------------------------------
+    // Helpers
     // -------------------------------------------------------------------------------------
     private static String canSaveFile(String strId, Path pathFile) {
 

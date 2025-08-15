@@ -224,7 +224,7 @@ public class JfxFileContentEditorMenuController {
             public void changed(ObservableValue<? extends Tab> observable, Tab tabFrom, Tab tabTo) {
 
                 if (tabTo == null) {
-                    LOGGER.debug("TabPane ChangeListener tabTo is null."
+                    LOGGER.error("TabPane ChangeListener tabTo is null."
                             + " this=\"" + this + "\"");
                     return;
                 }
@@ -240,7 +240,7 @@ public class JfxFileContentEditorMenuController {
                 boolean booTextWrap = fileEditor.isTextWrap();
                 cbTextWrap.setSelected(booTextWrap);
 
-                LOGGER.debug("TabPane ChangeListener."
+                LOGGER.trace("TabPane ChangeListener."
                         + " this=\"" + this + "\""
                         //+ " strTabFromId=\"" + strTabFromId + "\""
                         + " strTabToId=\"" + strTabToId + "\""
@@ -308,7 +308,7 @@ public class JfxFileContentEditorMenuController {
                 FileContentEditor fileEditor = (FileContentEditor) tab.getContent();
                 fileEditor.setTextWrap(newValue);
 
-                LOGGER.debug("cbTextWrap ChangeListener."
+                LOGGER.trace("cbTextWrap ChangeListener."
                         + " this=\"" + this + "\""
                         + " observable=\"" + observable + "\""
                         + " oldValue=\"" + oldValue + "\""
@@ -646,31 +646,59 @@ public class JfxFileContentEditorMenuController {
             fileChooser.setInitialDirectory(new File(Settings.STR_DIRECTORY_USER_HOME_PATH));
         }
 
-        File fileSaveAs = fileChooser.showSaveDialog(this.borderPaneEditor.getScene().getWindow());
+        File fileSaveAs = null;
+        Window window = null;
+        try {
+            Scene scene = this.borderPaneEditor.getScene();
+            window = scene.getWindow();
+            LOGGER.debug("Saving file As."
+                    + " TabId=\"" + strTabId + "\""
+                    + " FilePath=\"" + strFilePath + "\""
+                    + " borderPaneEditor=\"" + this.borderPaneEditor + "\""
+                    + " scene=\"" + scene + "\""
+                    + " window=\"" + window + "\"");
+            fileSaveAs = fileChooser.showSaveDialog(window);
+        } catch (Throwable t) {
+            LOGGER.error("Saving file As failed."
+                    + " TabId=\"" + strTabId + "\""
+                    + " FilePath=\"" + strFilePath + "\""
+                    + " window=\"" + window + "\""
+                    + " fileSaveAs=\"" + fileSaveAs + "\""
+                    + " Throwable=\"" + t.toString() + "\"");
+            return;
+        }
+
         if (fileSaveAs == null) {
             LOGGER.info("Saving file As canceled."
                     + " TabId=\"" + strTabId + "\""
                     + " FilePathOld=\"" + strFilePath + "\"");
             return;
         }
-        String strFileNameAs = fileSaveAs.getName();
-        String strFilePathAs = fileSaveAs.getAbsolutePath();
+
         Path pathFileSaveAs = fileSaveAs.toPath();
+        fileEditor.parseFilePath(strTabId, pathFileSaveAs);
+        String strFileNameAs = fileEditor.getFileName();
+        String strFilePathAs = fileEditor.getFilePath();
+        String strFileNameExtAs = fileEditor.getFileExt();
+        String strFileDirAs = fileEditor.getFileDir();
 
         LOGGER.info("Saving file As."
                 + " TabId=\"" + strTabId + "\""
-                + " FileNameOld=\"" + strFileName + "\""
                 + " FilePathOld=\"" + strFilePath + "\""
+                + " FileNameOld=\"" + strFileName + "\""
+                + " FileNameExt=\"" + strFileNameExt + "\""
+                + " FileDirOld=\"" + strFileDir + "\""
+                + " FilePathAs=\"" + pathFileSaveAs + "(" + strFilePathAs + ")" + "\""
                 + " FileNameAs=\"" + strFileNameAs + "\""
-                + " FilePathAs=\"" + strFilePathAs + "\""
-                + " pathFileSaveAs=\"" + pathFileSaveAs + "\"");
+                + " FileNameExtAs=\"" + strFileNameExtAs + "\""
+                + " FileDirAs=\"" + strFileDir + "\"");
         if (fileEditor.saveFile(pathFileSaveAs)) {
             strFileNameAs = fileEditor.getFileName();
             tab.setText(strFileNameAs);
             strFilePathAs = fileEditor.getFilePath();
             Tooltip tltp = tab.getTooltip();
             tltp.setText(strFilePathAs);
-            Settings.setLastOpenedDir(strFilePathAs);
+            Settings.setLastOpenedDir(strFileDirAs);
         }
     }
 
