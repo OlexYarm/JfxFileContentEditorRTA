@@ -36,15 +36,15 @@
     
     <HBox fx:id="hboxBottomFind" visible="false">
         <TextField fx:id="tfBottomFind" maxWidth="1000" prefWidth="300" promptText="Find What" />
-        <Button onAction="#findNext" text="Next" />
-        <Button onAction="#findPrev" text="Prev" disable="true"/>
-        <Button onAction="#findAll" text="All" />
+        <Button fx:id="btBottomNext" onAction="#findNext" text="Next" />
+        <Button fx:id="btBottomPrev" onAction="#findPrev" text="Prev" />
+        <Button fx:id="btBottomAll" onAction="#findAll" text="All" />
     </HBox>
     
     <HBox fx:id="hboxBottomReplace" visible="false">
         <TextField fx:id="tfBottomReplace" maxWidth="1000" prefWidth="300" promptText="Replace With" />
-        <Button onAction="#replace" text="Replace" />
-        <Button onAction="#replaceAll" text="Replace All" />
+        <Button fx:id="btBottomReplace" onAction="#replace" text="Replace" />
+        <Button fx:id="btBottomReplaceAll" onAction="#replaceAll" text="Replace All" />
     </HBox>
     
     <HBox fx:id="hboxBottomVersion" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml">

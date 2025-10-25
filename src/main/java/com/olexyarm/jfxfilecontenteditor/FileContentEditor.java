@@ -32,6 +32,7 @@ import java.nio.file.StandardOpenOption;
 import java.nio.file.attribute.FileTime;
 import java.time.LocalDate;
 import java.util.EnumSet;
+import java.util.TreeSet;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import javafx.beans.property.ReadOnlyBooleanProperty;
@@ -99,6 +100,7 @@ public class FileContentEditor extends VBox {
     private final StyledTextModel model = new RichTextModel();
     private final RichTextArea richTextArea = new RichTextArea(model);
     private StyleAttributeMap mapStyleAttrFont;
+    private StyleAttributeMap mapStyleAttrSelection;
 
     private final HBox hboxState;
     private final Label lblFileState;
@@ -118,10 +120,17 @@ public class FileContentEditor extends VBox {
     private final ReadOnlyProperty<TextPos> textPosCaretPositionProperty;
     private final ChangeListener<TextPos> textPosCaretPositionChangeListener;
     private TextPos textPosCaretPosition = TextPos.ZERO;
+    private int intCaretPosParagraphCurrent;
+    private int intCaretPosOffsetCurrent;
+    private int intCaretPosCharIndexCurrent;
 
     private Font font;
 
     private TabPane tabPane;
+
+    private final TreeSet<TextPos> lstTextPosFound = new TreeSet<>();
+    private String strTextFindLatest;
+    private boolean booFoundAllDone;
 
     // ---------- Graphics - End -----------------------------------------------------
     // -------------------------------------------------------------------------------------
@@ -157,6 +166,8 @@ public class FileContentEditor extends VBox {
             richTextArea.pastePlainText();
         });
 
+        this.richTextArea.select(textPosCaretPosition);
+
         VBox.setVgrow(this.richTextArea, Priority.ALWAYS);
 
         this.hboxState = new HBox();
@@ -186,9 +197,17 @@ public class FileContentEditor extends VBox {
             public void changed(ObservableValue<? extends TextPos> observable, TextPos oldValue, TextPos newValue) {
                 hboxState.setVisible(false);
                 textPosCaretPosition = newValue;
+                intCaretPosParagraphCurrent = textPosCaretPosition.index();
+                intCaretPosOffsetCurrent = textPosCaretPosition.offset();
+                intCaretPosCharIndexCurrent = textPosCaretPosition.charIndex();
                 LOGGER.trace("textPosCaretPositionChangeListener."
                         + " Id=\"" + strId + "\""
                         + " FileName=\"" + strFileName + "\""
+                        + " paragraphIndex=" + intCaretPosParagraphCurrent
+                        + " offset=" + intCaretPosOffsetCurrent
+                        + " charIndex=" + intCaretPosCharIndexCurrent
+                        + " intCaretPosParagraphCurrent=" + intCaretPosParagraphCurrent
+                        + " intCaretPosOffsetCurrent=" + intCaretPosOffsetCurrent
                         + " observable=" + observable
                         + " oldValue=" + oldValue + " newValue=" + newValue);
             }
@@ -236,6 +255,12 @@ public class FileContentEditor extends VBox {
         this.booPropFocusedProperty.addListener(this.focusedPropertyChangeListener);
 
         // ---------- registerListeners - end ------------------------------------------------
+        // ---------- init vars - begin ------------------------------------------------------
+        this.booFoundAllDone = false;
+        this.strTextFindLatest = null;
+        //this.slstFounds = new SortedList<>(olstTextPosFounds, Comparator.naturalOrder());
+        // ---------- init vars - end --------------------------------------------------------
+
         // -------------------------------------------------------------------------------------
         LOGGER.debug("## Created ContentEditor."
                 + " Id=\"" + strId + "\""
@@ -362,7 +387,7 @@ public class FileContentEditor extends VBox {
 
                 int intProgressCounter = 1;
                 long lngBytesReadTotal = 0;
-                int intRemaining = 0;
+                int intRemaining;
                 int intBytesReadLast = -1;
                 long lngLinesLoaded = 0;
                 int intErrors = 0;
@@ -469,7 +494,6 @@ public class FileContentEditor extends VBox {
                             break;
                         }
                     }
-                    fileChannel.close();
                 } catch (Throwable t) {
                     updateMessage("Error loading File." + t.getMessage());
                     LOGGER.error("Could not Read File."
@@ -695,7 +719,6 @@ public class FileContentEditor extends VBox {
                                     + " Steps=" + intSteps
                                     + " pathFile=\"" + pathFile + "\"");
                             int intFrom = 0;
-                            //try (BufferedWriter writer = Files.newBufferedWriter(pathFile, charset)) {
                             if (intSteps == 0) {
                                 writer.write(strText, 0, intTextLen);
                                 LOGGER.debug("Saving whole paragraph."
@@ -766,6 +789,7 @@ public class FileContentEditor extends VBox {
                     booPropFocusedProperty.removeListener(focusedPropertyChangeListener);
 
                     hboxState.visibleProperty().set(true);
+                    lblFileName.setText(strFileName);
                     lblFileState.textProperty().set("");
                     progressBar.progressProperty().bind(serviceFileSave.progressProperty());
                     lblFileState.textProperty().bind(serviceFileSave.messageProperty());
@@ -827,7 +851,7 @@ public class FileContentEditor extends VBox {
                     String stateName = state.name();
                     progressBar.progressProperty().unbind();
                     lblFileState.textProperty().unbind();
-                    String strResult = (String) serviceFileSave.getValue();
+                    String strResult = serviceFileSave.getValue();
                     String strMsg = serviceFileSave.getMessage();
                     lblFileState.textProperty().set(strMsg);
 
@@ -867,101 +891,251 @@ public class FileContentEditor extends VBox {
     }
 
     // -------------------------------------------------------------------------------------
-    public int find(String strTextFind, String strTextReplace, boolean booAll) {
+    public String find(String strTextFind, String strTextReplace, boolean booAll, boolean booRevers) {
 
         if (strTextFind == null || strTextFind.isEmpty()) {
-            LOGGER.error("Text for search not set."
-                    + " pathFile=\"" + pathFile + "\"");
-            return -1;
+            String strMsg = "Text for search not set.";
+            LOGGER.error(strMsg + " pathFile=\"" + pathFile + "\"");
+            return strMsg;
         }
+        if (strTextFind.equals(this.strTextFindLatest)) {
+            if (booAll) {
+                if (this.booFoundAllDone) {
+                    int intFoundSize = this.lstTextPosFound.size();
+                    return "Found " + intFoundSize + " occurrence(s).";
+                }
+            }
+        } else {
+            this.booFoundAllDone = false;
+            this.selectionClear();
+            this.lstTextPosFound.clear();
+            this.strTextFindLatest = strTextFind;
+        }
+
         int intParagraphCount = richTextArea.getParagraphCount();
         if (intParagraphCount == 0) {
-            LOGGER.debug("Could not search in empty file."
-                    + " pathFile=\"" + pathFile + "\"");
-            return -1;
+            String strMsg = "Could not search in empty file.";
+            LOGGER.debug(strMsg + " pathFile=\"" + pathFile + "\"");
+            return strMsg;
         }
-        int intCount = 0;
         int intTextFindLen = strTextFind.length();
+        int intFoundCounter = 0;
         if (booAll) {
             // Find all occurrences of text in file content.
-            TextPos textposCurrent = this.richTextArea.getCaretPosition(); // for debug only
             this.selectionClear();
             for (int intParagraph = 0; intParagraph < intParagraphCount; intParagraph++) {
                 String strText = richTextArea.getPlainText(intParagraph);
+                if (strText == null || strText.isEmpty()) {
+                    continue;
+                }
                 int intPosFound = 0;
                 while (intPosFound != -1) {
                     intPosFound = strText.indexOf(strTextFind, intPosFound);
                     if (intPosFound != -1) {
-                        intCount++;
-                        this.selectTextRange(intParagraph, intPosFound, intPosFound + intTextFindLen, strTextReplace);
+                        intFoundCounter++;
+                        this.textRangeSelectReplace(intParagraph, intPosFound, intPosFound + intTextFindLen, false, strTextReplace);
                         LOGGER.debug("Found Text."
                                 + " Id=\"" + this.strId + "\""
                                 + " TextFind=\"" + strTextFind + "\""
-                                + " TextReplace=\"" + strTextReplace + "\""
+                                + " FoundCounter=" + intFoundCounter
                                 + " Paragraph=" + intParagraph
-                                + " Count=" + intCount
                                 + " PosFound=" + intPosFound);
                         intPosFound += intTextFindLen;
                     }
                 }
             }
-            return intCount;
+            this.booFoundAllDone = true;
+            return "Found " + intFoundCounter + " occurrence(s).";
         } else {
-            // Find first occurent of text from Cursor position
-            int intParagraphPos = this.textPosCaretPosition.index();
-            int intCaretPos = this.textPosCaretPosition.charIndex();
-            if (intParagraphPos >= intParagraphCount) {
+            // Find Next/Prev occurrences of text in file content.
+            if (this.intCaretPosParagraphCurrent >= intParagraphCount) {
+                // It should never happen, but ...
                 LOGGER.error("Could not find Text because Paragraph Index out of range."
                         + " Id=\"" + this.strId + "\""
                         + " TextFind=\"" + strTextFind + "\""
-                        + " ParagraphPos=" + intParagraphPos
+                        + " ParagraphPosCurrent=" + this.intCaretPosParagraphCurrent
                         + " ParagraphCount=" + intParagraphCount);
                 this.selectionClear();
-                return -1;
+                return "Internal error";
             }
-            int intPosFound;
-            for (int intParagraph = intParagraphPos; intParagraph < intParagraphCount; intParagraph++) {
-                String strText = richTextArea.getPlainText(intParagraph);
-                intPosFound = strText.indexOf(strTextFind, intCaretPos);
-                if (intPosFound >= 0) {
-                    this.selectTextRange(intParagraph, intPosFound, intPosFound + intTextFindLen, strTextReplace);
-                    LOGGER.debug("Found Text after cursor position."
-                            + " Id=\"" + this.strId + "\""
-                            + " TextFind=\"" + strTextFind + "\""
-                            + " textPosCaretPosition=\"" + textPosCaretPosition + "\""
-                            + " Paragraph=" + intParagraph
-                            + " PosFound=" + intPosFound);
-                    return 1;
+
+            if (this.booFoundAllDone == true) {
+                if (this.lstTextPosFound.isEmpty()) {
+                    return "Could not find any occurrence.";
                 }
-                intCaretPos = 0;
-            }
-            for (int intParagraph = 0; intParagraph <= intParagraphPos; intParagraph++) {
-                String strText = richTextArea.getPlainText(intParagraph);
-                intPosFound = strText.indexOf(strTextFind, intCaretPos);
-                if (intPosFound >= 0) {
-                    this.selectTextRange(intParagraph, intPosFound, intPosFound + intTextFindLen, strTextReplace);
-                    LOGGER.debug("Found Text before cursor position."
-                            + " Id=\"" + this.strId + "\""
-                            + " TextFind=\"" + strTextFind + "\""
-                            + " TextReplace=\"" + strTextReplace + "\""
-                            + " Paragraph=" + intParagraph
-                            + " textPosCaretPosition=\"" + textPosCaretPosition + "\""
-                            + " PosFound=" + intPosFound);
-                    return 1;
+                // Get TexPos from Found List.
+                int intFoundTotal = this.lstTextPosFound.size();
+                int intFoundCount = 0;
+                TextPos tpPrev = null;
+                TextPos tpPrePrev = null;
+                for (TextPos tp : this.lstTextPosFound) {
+                    intFoundCount++;
+                    int intTextPosIndex = tp.index();
+                    if (intTextPosIndex < this.intCaretPosParagraphCurrent) {
+                        tpPrePrev = tpPrev;
+                        tpPrev = tp;
+                        continue;
+                    }
+                    int intCharIndex = tp.charIndex();
+                    if (intTextPosIndex == this.intCaretPosParagraphCurrent && intCharIndex < this.intCaretPosOffsetCurrent) {
+                        tpPrePrev = tpPrev;
+                        tpPrev = tp;
+                        continue;
+                    }
+                    if (booRevers) {
+                        // TODO: Fix it !!!
+                        //if (tpPrePrev != null) {
+                        //    intTextPosIndex = tpPrePrev.index();
+                        //    intCharIndex = tpPrePrev.charIndex();
+                        //} else
+                        if (tpPrev != null) {
+                            intTextPosIndex = tpPrev.index();
+                            intCharIndex = tpPrev.charIndex();
+                        }
+                    }
+                    this.textRangeSelectReplace(intTextPosIndex, intCharIndex, intCharIndex + intTextFindLen, booRevers, strTextReplace);
+                    return "Found " + intFoundCount + " of " + intFoundTotal
+                            + " (" + (intTextPosIndex + 1) + ":" + (intCharIndex + 1) + ").";
                 }
+                TextPos tp = this.lstTextPosFound.getFirst();
+                int intTextPosIndex = tp.index();
+                int intCharIndex = tp.charIndex();
+                this.textRangeSelectReplace(intTextPosIndex, intCharIndex, intCharIndex + intTextFindLen, false, strTextReplace);
+                return "Found 1 of " + intFoundTotal + " (" + (intTextPosIndex + 1) + ":" + (intCharIndex + 1) + ").";
+            } else {
+                // Find first occurent of text from Current Cursor position
+                int intPosFound = this.intCaretPosOffsetCurrent;
+                if (booRevers) {
+                    StringBuilder sbReverse = new StringBuilder();
+                    sbReverse.append(strTextFind);
+                    sbReverse.reverse();
+                    String strTextFindReverse = sbReverse.toString();
+                    int intCaretPos = this.intCaretPosOffsetCurrent;
+                    for (int intParagraph = this.intCaretPosParagraphCurrent; intParagraph >= 0; intParagraph--) {
+                        String strFound = this.findSubstringReverse(intParagraph, intCaretPos, strTextFindReverse, strTextReplace);
+                        if (strFound != null) {
+                            return strFound;
+                        }
+                        intCaretPos = 0;
+                    }
+                    for (int intParagraph = intParagraphCount - 1; intParagraph > this.intCaretPosParagraphCurrent; intParagraph--) {
+                        String strFound = this.findSubstringReverse(intParagraph, intCaretPos, strTextFindReverse, strTextReplace);
+                        if (strFound != null) {
+                            return strFound;
+                        }
+                    }
+                    return "Not found";
+                }
+
+                for (int intParagraph = this.intCaretPosParagraphCurrent; intParagraph < intParagraphCount; intParagraph++) {
+                    String strText = richTextArea.getPlainText(intParagraph);
+                    intPosFound = strText.indexOf(strTextFind, intPosFound); //this.intCaretPosOffsetCurrent);
+                    if (intPosFound >= 0) {
+                        this.textRangeSelectReplace(intParagraph, intPosFound, intPosFound + intTextFindLen, false, strTextReplace);
+                        LOGGER.debug("Found Text after cursor position."
+                                + " Id=\"" + this.strId + "\""
+                                + " TextFind=\"" + strTextFind + "\""
+                                + " textPosCaretPosition=\"" + textPosCaretPosition + "\""
+                                + " Paragraph=" + intParagraph
+                                + " PosFound=" + intPosFound);
+                        int intFoundTotal = this.lstTextPosFound.size();
+                        String strMore = "";
+                        if (!this.booFoundAllDone) {
+                            strMore = "+";
+                        }
+                        return "Found 1 of " + intFoundTotal + strMore
+                                + " (" + (intParagraph + 1) + ":" + intPosFound + ")" + ".";
+                    }
+                    intPosFound = 0;
+                }
+
+                for (int intParagraph = 0; intParagraph < this.intCaretPosParagraphCurrent; intParagraph++) {
+                    String strText = richTextArea.getPlainText(intParagraph);
+                    intPosFound = strText.indexOf(strTextFind, intPosFound);
+                    if (intPosFound >= 0) {
+                        this.textRangeSelectReplace(intParagraph, intPosFound, intPosFound + intTextFindLen, false, strTextReplace);
+                        LOGGER.debug("Found Text before cursor position."
+                                + " Id=\"" + this.strId + "\""
+                                + " TextFind=\"" + strTextFind + "\""
+                                + " TextReplace=\"" + strTextReplace + "\""
+                                + " Paragraph=" + intParagraph
+                                + " textPosCaretPosition=\"" + textPosCaretPosition + "\""
+                                + " PosFound=" + intPosFound);
+                        int intFoundTotal = this.lstTextPosFound.size();
+                        String strMore = "";
+                        if (!this.booFoundAllDone) {
+                            strMore = "+";
+                        }
+                        return "Found 1 of " + intFoundTotal + strMore
+                                + " (" + (intParagraph + 1) + ":" + intPosFound + ")" + ".";
+                    }
+                }
+                this.selectionClear();
+                return "Not found";
             }
-            this.selectionClear();
-            return -1;
         }
     }
 
     // -------------------------------------------------------------------------------------
-    private void selectTextRange(int intParagraph, int intPosStart, int intPosEnd, String strReplace) {
+    public String findSubstringReverse(int intParagraph, int intCaretPosCurrent, String strTextFindReverse, String strTextReplace) {
+
+        String strText = richTextArea.getPlainText(intParagraph);
+        StringBuilder sbReverse = new StringBuilder();
+        sbReverse.append(strText);
+        sbReverse.reverse();
+        String strTextReverse = sbReverse.toString();
+        int intTextLen = strText.length();
+        int intCaretPosCurrentReverse;
+        if (intCaretPosCurrent > 0) {
+            intCaretPosCurrentReverse = intTextLen - intCaretPosCurrent;
+        } else {
+            intCaretPosCurrentReverse = 0;
+        }
+        int intPosFoundReverse = intCaretPosCurrentReverse;
+        intPosFoundReverse = strTextReverse.indexOf(strTextFindReverse, intPosFoundReverse);
+        if (intPosFoundReverse >= 0) {
+            int intTextFindLen = strTextFindReverse.length();
+            int intPosFound = intTextLen - intPosFoundReverse - intTextFindLen;
+            this.textRangeSelectReplace(intParagraph, intPosFound, intPosFound + intTextFindLen, true, strTextReplace);
+
+            int intFoundTotal = this.lstTextPosFound.size();
+            String strMore = "";
+            if (!this.booFoundAllDone) {
+                strMore = " (more)";
+            }
+            return "Found 1 of " + intFoundTotal
+                    + " (" + (intParagraph + 1) + ":" + intPosFound + ")" + strMore + ".";
+        }
+        return null;
+    }
+
+    // -------------------------------------------------------------------------------------
+    public String findPrev(String strTextFind, String strTextReplace) {
+
+        if (strTextFind == null || strTextFind.isEmpty()) {
+            String strMsg = "Text for Prev search not set.";
+            LOGGER.error(strMsg + " pathFile=\"" + pathFile + "\"");
+            return strMsg;
+        }
+        if (strTextFind.equals(this.strTextFindLatest)) {
+        } else {
+            this.booFoundAllDone = false;
+            this.selectionClear();
+            this.lstTextPosFound.clear();
+            this.strTextFindLatest = strTextFind;
+        }
+        String strResult = this.find(strTextFind, strTextReplace, false, true);
+        return strResult;
+    }
+
+    // -------------------------------------------------------------------------------------
+    private boolean textRangeSelectReplace(int intParagraph, int intPosStart, int intPosEnd, boolean booReverse, String strReplace) {
 
         String strFontFamily = this.font.getFamily();
         double dblFontSize = this.font.getSize();
-// TODO: change selection background.
-        StyleAttributeMap mapStyleAttrSelected = StyleAttributeMap.builder()
+
+        // TODO: change selection background.
+        this.mapStyleAttrSelection = StyleAttributeMap.builder()
                 .setFontFamily(strFontFamily)
                 .setFontSize(dblFontSize)
                 //.setBackground(Color.ORANGE)
@@ -969,25 +1143,47 @@ public class FileContentEditor extends VBox {
                 .build();
 
         TextPos textPosStart = new TextPos(intParagraph, intPosStart, intPosStart, false);
-        TextPos textPosEnd = new TextPos(intParagraph, intPosEnd, intPosEnd, false);
+        TextPos textPosEnd = new TextPos(intParagraph, intPosEnd, intPosEnd - 1, false);
+        // TODO: set booFoundAllDone when all text were searched !!!
+        //if (strReplace == null && this.lstTextPosFound.contains(textPosStart)) {
+        //    this.richTextArea.select(textPosStart, textPosEnd);
+        //    return this.booFoundAllDone;
+        //}
 
-        this.model.applyStyle(textPosStart, textPosEnd, mapStyleAttrSelected, false);
+        this.model.applyStyle(textPosStart, textPosEnd, this.mapStyleAttrSelection, false);
         this.richTextArea.select(textPosStart, textPosEnd);
+
+        if (booReverse) {
+            int intPosCursor = intPosStart - 1;
+            if (intPosCursor < 0) {
+                intPosCursor = 0;
+            }
+            TextPos textPosCursor = new TextPos(intParagraph, intPosCursor, intPosCursor, false);
+            this.richTextArea.select(textPosCursor, textPosCursor);
+        }
+
         this.richTextArea.requestFocus();
 
         if (strReplace != null) {
             this.richTextArea.replaceText(textPosStart, textPosEnd, strReplace, true);
+        } else {
+            if (this.lstTextPosFound.contains(textPosStart)) {
+                //this.booFoundAllDone = true;
+            } else {
+                this.lstTextPosFound.add(textPosStart);
+            }
         }
 
-        LOGGER.debug("selectTextRange."
+        LOGGER.debug("textRangeSelectReplace."
                 + " Id=\"" + this.strId + "\""
                 + " Paragraph=" + intParagraph
-                + " textPosCaretPositionProperty=\"" + textPosCaretPositionProperty + "\""
-                + " textPosCaretPosition=\"" + textPosCaretPosition + "\""
                 + " PosStart=" + intPosStart
                 + " PosEnd=" + intPosEnd
                 + " textPosStart=\"" + textPosStart + "\""
-                + " textPosEnd=\"" + textPosEnd + "\"");
+                + " textPosEnd=\"" + textPosEnd + "\""
+                + " textPosCaretPositionProperty=\"" + textPosCaretPositionProperty + "\""
+                + " textPosCaretPosition=\"" + textPosCaretPosition + "\"");
+        return this.booFoundAllDone;
     }
 
     // -------------------------------------------------------------------------------------
@@ -1124,7 +1320,7 @@ public class FileContentEditor extends VBox {
             return;
         }
         if (!Files.exists(pathFile)) {
-            LOGGER.error("Could not create *bak File because File does not exist."
+            LOGGER.trace("Could not create *bak File because File does not exist."
                     + " TabId=\"" + strTabId + "\""
                     + " pathFile=\"" + pathFile + "\"");
             return;
@@ -1178,7 +1374,6 @@ public class FileContentEditor extends VBox {
             strFilePathNoExt = strFilePath.substring(0, intPos);
         }
 
-// TODO:  Always backup Favorites file after editing.
         boolean booFileBackupOldest = true;
         Path pathFileBackupOld = null;
         Path pathFileBackup = null;

@@ -364,8 +364,6 @@ public class JfxSettingsController implements Initializable {
                 Settings.applyLogLevel(newValue);
             }
         });
-
-        //cbSettingsLogLevel.addEventHandler(EventType.ROOT, eh);
         // -------------------------------------------------------------------------------------
     }
 

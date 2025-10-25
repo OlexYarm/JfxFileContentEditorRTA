@@ -206,9 +206,54 @@ public class Utils {
                         return true;
                     }
                 }
+                return false;
             default:
                 return false;
         }
+    }
+
+    // -------------------------------------------------------------------------------------
+    public static String checkDirectoryExist(String strTabID, String strPathFile) {
+
+        String strErrMsg;
+        if (strPathFile == null) {
+            strErrMsg = "pathFile is null.";
+            LOGGER.error(strErrMsg
+                    + " TabId=\"" + strTabID + "\"");
+            return strErrMsg;
+        }
+
+        try {
+            Path pathFile = Path.of(strPathFile);
+            if (!Files.exists(pathFile)) {
+                strErrMsg = "pathFile does not exist.";
+                LOGGER.error(strErrMsg
+                        + " TabId=\"" + strTabID + "\""
+                        + " pathFile=\"" + pathFile + "\"");
+                return strErrMsg;
+            }
+            if (!Files.isDirectory(pathFile)) {
+                strErrMsg = "pathFile is not directory.";
+                LOGGER.error(strErrMsg
+                        + " TabId=\"" + strTabID + "\""
+                        + " pathFile=\"" + pathFile + "\"");
+                return strErrMsg;
+            }
+            if (!Files.isReadable(pathFile)) {
+                strErrMsg = "pathFile is not Readable.";
+                LOGGER.error(strErrMsg
+                        + " TabId=\"" + strTabID + "\""
+                        + " pathFile=\"" + pathFile + "\"");
+            }
+        } catch (Throwable t) {
+            strErrMsg = "Could analize pathFile.";
+            LOGGER.error(strErrMsg
+                    + " TabId=\"" + strTabID + "\""
+                    + " pathFile=\"" + strPathFile + "\""
+                    + " Throwable=\"" + t.toString() + "\"");
+            return strErrMsg;
+        }
+        return "";
     }
 
     // -------------------------------------------------------------------------------------
@@ -567,7 +612,7 @@ public class Utils {
             ButtonType btNo = new ButtonType(strButtonTextNo, ButtonBar.ButtonData.CANCEL_CLOSE);
             alert.getButtonTypes().add(btNo);
         }
-        LOGGER.debug("Show Alert."
+        LOGGER.trace("Show Alert."
                 + " Title=\"" + strTitle + "\""
                 + " Header=\"" + strHeader + "\""
                 + " Message=\"" + strMessage + "\"");
@@ -575,7 +620,7 @@ public class Utils {
         boolean booReturn = false;
         Optional<ButtonType> result = alert.showAndWait();
         if (btYes != null && result.orElse(btYes) == btYes) {
-            LOGGER.debug("Alert response Yes."
+            LOGGER.trace("Alert response Yes."
                     + " Title=\"" + strTitle + "\""
                     + " Header=\"" + strHeader + "\""
                     + " Message=\"" + strMessage + "\"");

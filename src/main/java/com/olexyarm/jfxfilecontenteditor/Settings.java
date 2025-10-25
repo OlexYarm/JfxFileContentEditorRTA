@@ -792,7 +792,14 @@ public class Settings {
 
     // -------------------------------------------------------------------------------------
     public static String getLastOpenedDir() {
-        return STR_SETTINGS_LAST_OPENED_DIR;
+
+        // TODO: check if directory exists !!!
+        String strErr = Utils.checkDirectoryExist("", STR_SETTINGS_LAST_OPENED_DIR);
+        if (strErr == null || strErr.isEmpty()) {
+            return STR_SETTINGS_LAST_OPENED_DIR;
+        }else{
+            return STR_DIRECTORY_USER_HOME_PATH;
+        }
     }
 
     public static void setLastOpenedDir(String strLastOpenedDir) {

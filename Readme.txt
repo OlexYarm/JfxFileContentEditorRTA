@@ -20,9 +20,9 @@ The editor has all minimum and necessary features for editing test files small/m
 
 2) Prerequisites
 For building editor from source files following programs should be installed:
-- Java SDK 24;
-- Apache Maven 3.9.3 or later.
-After image is created it could be copied and running on any computed supported by Java 24.
+- Java SDK 25;
+- Apache Maven 3.9.11 or later.
+After image is created it could be copied and running on any computed supported by Java 25.
 
 3) Building and running editor
 
@@ -51,7 +51,7 @@ or on Windows run bat-file
 
 jfxEditor.bat
 
-The bat-file will open new window with Java runtime in it and additional window with Editor. Both windows will be open and visible until the editor is closed.
+The bat-file with open new window with Java runtime in it and additional window with Editor. Both windows will be open and visible until the editor is closed.
 To prevent showing window with Java runtime the bat-file should be edited as below:
 rem "%DIR%\java" %JLINK_VM_OPTIONS% -m com.olexyarm.jfxfilecontenteditor/com.olexyarm.jfxfilecontenteditor.App %*
 start javaw  %JLINK_VM_OPTIONS% -m com.olexyarm.jfxfilecontenteditor/com.olexyarm.jfxfilecontenteditor.App %*

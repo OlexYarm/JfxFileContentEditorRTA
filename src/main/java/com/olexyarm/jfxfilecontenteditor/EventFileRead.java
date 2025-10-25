@@ -26,6 +26,7 @@ public class EventFileRead extends Event { //WorkerStateEvent {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EventFileRead.class);
     public static final EventType<EventFileRead> _FILE_READ = new EventType<>(ANY, "_FILE_READ");
+    private static final long serialVersionUID = 1L;
 
     private String strId;
     private String strLineEnding;
@@ -35,13 +36,19 @@ public class EventFileRead extends Event { //WorkerStateEvent {
 
         super(obj, eventTarget, eventType);
 
-        Class clazz = obj.getClass();
-        LOGGER.debug("EventFileRead Constructor."
-                + " eventType=\"" + eventType + "\""
-                + " eventTarget=\"" + eventTarget + "\""
-                + " obj.getClass=\"" + clazz + "\""
-                + " obj=\"" + obj + "\""
-        );
+        if (obj == null) {
+            LOGGER.error("EventFileRead Constructor."
+                    + " eventType=\"" + eventType + "\""
+                    + " eventTarget=\"" + eventTarget + "\""
+                    + " obj=\"" + obj + "\"");
+        } else {
+            LOGGER.debug("EventFileRead Constructor."
+                    + " eventType=\"" + eventType + "\""
+                    + " eventTarget=\"" + eventTarget + "\""
+                    + " obj.getClass=\"" + obj.getClass() + "\""
+                    + " obj=\"" + obj + "\""
+            );
+        }
     }
 
     // -------------------------------------------------------------------------------------

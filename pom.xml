@@ -2,22 +2,20 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.olexyarm</groupId>
-    <artifactId>JfxFileContentEditorRTA</artifactId>
-    <version>3.0.0</version>
+    <artifactId>JfxFileContentEditor</artifactId>
+    <version>3.1.0</version>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven-compiler-plugin.version>3.13.0</maven-compiler-plugin.version>
-        <maven.compiler.source>24</maven.compiler.source>
-        <maven.compiler.target>24</maven.compiler.target>
-        <maven.compiler.release>24</maven.compiler.release>
-        <maven-dependency-plugin.version>3.6.1</maven-dependency-plugin.version>
-        <maven-jar-plugin.version>3.4.1</maven-jar-plugin.version>
+        <maven-compiler-plugin.version>3.14.1</maven-compiler-plugin.version>
+        <maven.compiler.release>25</maven.compiler.release>
+        <maven-dependency-plugin.version>3.9.0</maven-dependency-plugin.version>
+        <maven-jar-plugin.version>3.4.2</maven-jar-plugin.version>
         <javafx-maven-plugin.version>0.0.8</javafx-maven-plugin.version>
-        <javafx.version>24</javafx.version>
-        <javafx.incubator.version>25-ea+18</javafx.incubator.version>
-        <logback.version>1.5.3</logback.version>
-        <slf4j-api.version>2.0.12</slf4j-api.version>
+        <javafx.version>25</javafx.version>
+        <javafx.incubator.version>26-ea+10</javafx.incubator.version>
+        <logback.version>1.5.19</logback.version>
+        <slf4j-api.version>2.0.17</slf4j-api.version>
         <timestamp>${maven.build.timestamp}</timestamp>
         <maven.build.timestamp.format>yyyy-MM-dd HH:mm</maven.build.timestamp.format>
         <imageName>jfxEditor</imageName>
@@ -81,8 +79,13 @@
                 <version>${maven-compiler-plugin.version}</version>
                 <configuration>
                     <verbose>false</verbose>
+                    <debug>true</debug>
+                    <debuglevel>lines,vars,source</debuglevel>
                     <release>${maven.compiler.release}</release>
                     <showDeprecation>true</showDeprecation>
+                    <compilerArgs>
+                        <arg>-Xlint</arg>
+                    </compilerArgs>
                 </configuration>
             </plugin>
 

@@ -25,6 +25,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.util.ArrayList;
 import java.util.List;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
@@ -57,6 +58,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.ToolBar;
 import javafx.scene.control.Tooltip;
 import javafx.scene.input.Clipboard;
+import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
@@ -195,6 +197,11 @@ public class JfxFileContentEditorMenuController {
     private Timeline timeline;
 
     private boolean booTextWrap;
+
+    private static int INT_MENU_ITEMS_INIT = -1;
+
+    private ChangeListener<String> changeListenerFind;
+    private final Clipboard clipboard = Clipboard.getSystemClipboard();
 
     // -------------------------------------------------------------------------------------
     // JFX constructor
@@ -379,8 +386,11 @@ public class JfxFileContentEditorMenuController {
             return;
         }
 
+        if (INT_MENU_ITEMS_INIT < 0) {
+            INT_MENU_ITEMS_INIT = menuItemsFavorites.size();
+        }
         int intMenuItemsCount = menuItemsFavorites.size();
-        menuItemsFavorites.remove(3, intMenuItemsCount);
+        menuItemsFavorites.remove(INT_MENU_ITEMS_INIT, intMenuItemsCount);
 
         String strFileFavoritesPath = Settings.caclulateFavoritesPath();
         Path pathFileFavorites = FileSystems.getDefault().getPath(strFileFavoritesPath);
@@ -396,7 +406,12 @@ public class JfxFileContentEditorMenuController {
                     strLine = strLine.trim();
                     if (!strLine.isEmpty()) {
                         boolean booFound = false;
+                        int intMenuItems = 0;
                         for (MenuItem item : menuItemsFavorites) {
+                            intMenuItems++;
+                            if (intMenuItems <= INT_MENU_ITEMS_INIT) {
+                                continue;
+                            }
                             String strMenuFilePath = item.getText();
                             if (strLine.equalsIgnoreCase(strMenuFilePath)) {
                                 LOGGER.debug("Favorites FilePath found in Menu"
@@ -593,7 +608,8 @@ public class JfxFileContentEditorMenuController {
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("*.log", "*.log"));
         //fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("*.encrypted","*.encrypted"));
 
-        File file = fileChooser.showOpenDialog(this.borderPaneEditor.getScene().getWindow());
+        Window window = this.borderPaneEditor.getScene().getWindow();
+        File file = fileChooser.showOpenDialog(window);
         if (file == null) {
             LOGGER.info("Opening File. File is not selected.");
             Utils.showMessage(AlertType.WARNING, "Opening File", "", "File is not selected.", null, null);
@@ -798,20 +814,33 @@ public class JfxFileContentEditorMenuController {
         node = (HBox) Utils.MAP_NODE_REFS.get(Utils.NODE_NAMES.hboxBottomFind.toString());
         node.setVisible(true);
 
-        TextField tfFind = fillFindFieldFromClipboard();
-        tfFind.requestFocus();
-        tfFind.positionCaret(0);
+        this.fillFindFieldFromClipboard();
     }
 
     private TextField fillFindFieldFromClipboard() {
 
         TextField tfFind = (TextField) Utils.MAP_NODE_REFS.get(Utils.NODE_NAMES.tfBottomFind.toString());
+
+        if (changeListenerFind == null) {
+            changeListenerFind = new ChangeListener<String>() {
+                @Override
+                public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
+                    final ClipboardContent content = new ClipboardContent();
+                    content.putString(newValue);
+                    clipboard.setContent(content);
+                }
+            };
+            tfFind.textProperty().addListener(changeListenerFind);
+        }
+
         String strTextToSearch = "";
-        Clipboard clipboard = Clipboard.getSystemClipboard();
         if (clipboard.hasString()) {
             strTextToSearch = clipboard.getString();
         }
+        tfFind.requestFocus();
+        tfFind.positionCaret(0);
         tfFind.setText(strTextToSearch);
+        tfFind.selectAll();
         return tfFind;
     }
 
@@ -835,7 +864,7 @@ public class JfxFileContentEditorMenuController {
         node = (HBox) Utils.MAP_NODE_REFS.get(Utils.NODE_NAMES.hboxBottomReplace.toString());
         node.setVisible(true);
 
-        TextField tfFind = fillFindFieldFromClipboard();
+        this.fillFindFieldFromClipboard();
 
         TextField tfReplace = (TextField) Utils.MAP_NODE_REFS.get(Utils.NODE_NAMES.tfBottomReplace.toString());
         tfReplace.requestFocus();
@@ -1133,34 +1162,51 @@ public class JfxFileContentEditorMenuController {
             }
         }
 
-        // TODO: Check if File Path is in Favorites list already.
+        // Check if File Path is in Favorites list already.
         Charset charset = Charset.forName(Settings.STR_CHARSET_CURRENT);
+        List<String> lstFavorites = new ArrayList<>();
         try (BufferedReader br = Files.newBufferedReader(pathFileFavorites, charset)) {
             int intLineCount = 0;
             String strLine;
             while ((strLine = br.readLine()) != null) {
                 intLineCount++;
-                if (!strLine.isEmpty()) {
+                if (strLine.isEmpty()) {
+                    LOGGER.warn("Empty line in Favorites File."
+                            + " TabId=\"" + strTabId + "\""
+                            + " LineNumber=\"" + intLineCount + "\"");
+                } else {
                     if (strLine.equals(strFilePathToAdd)) {
-                        LOGGER.info("FilePath found in Favorites File."
+                        LOGGER.warn("Skip FilePath found in Favorites File."
                                 + " TabId=\"" + strTabId + "\""
                                 + " LineNumber=\"" + intLineCount + "\""
                                 + " FilePath=\"" + strFilePathToAdd + "\""
                                 + " FileFavoritesPath=\"" + strFileFavoritesPath + "\"");
+                        showMessage(Alert.AlertType.WARNING, "FilePath already in Favorites",
+                                "\nFilePath=" + strFilePathToAdd,
+                                "File will be skipped", "OK", null);
                         return;
+                    } else {
+                        lstFavorites.add(strLine);
                     }
                 }
             }
         }
+        lstFavorites.add(strFilePathToAdd);
+
         LOGGER.debug("Adding FilePath to Favorites File."
                 + " TabId=\"" + strTabId + "\""
                 + " FilePath=\"" + strFilePathToAdd + "\""
                 + " FileFavoritesPathCalc=\"" + strFileFavoritesPath + "\""
                 + " FileFavoritesPath=\"" + strFileFavoritesPath + "\"");
 
-        try (BufferedWriter bw = Files.newBufferedWriter(pathFileFavorites, charset, StandardOpenOption.APPEND)) {
-            bw.append(strFilePathToAdd);
-            bw.append(System.lineSeparator()); //"\n");
+        int intLineCount = 0;
+        try (BufferedWriter bw = Files.newBufferedWriter(pathFileFavorites, charset,
+                StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING)) { //StandardOpenOption.APPEND
+            for (String strLine : lstFavorites) {
+                bw.append(strLine);
+                bw.append(System.lineSeparator());
+                intLineCount++;
+            }
         } catch (Throwable t) {
             LOGGER.error("Could not add FilePath to Favorites File."
                     + " TabId=\"" + strTabId + "\""
@@ -1170,6 +1216,7 @@ public class JfxFileContentEditorMenuController {
         }
         LOGGER.info("Added FilePath to Favorites File."
                 + " TabId=\"" + strTabId + "\""
+                + " LineTotal" + intLineCount
                 + " FilePath=\"" + strFilePathToAdd + "\""
                 + " FileFavoritesPath=\"" + strFileFavoritesPath + "\"");
         this.addFavorites();
