@@ -910,6 +910,9 @@ public class FileContentEditor extends VBox {
             this.selectionClear();
             this.lstTextPosFound.clear();
             this.strTextFindLatest = strTextFind;
+            if (!booCaseSensitive) {
+                strTextFind = strTextFind.toLowerCase();
+            }
         } else {
             if (booAll) {
                 if (this.booFoundAllDone) {
@@ -917,9 +920,6 @@ public class FileContentEditor extends VBox {
                     return "Found " + intFoundSize + " occurrence(s).";
                 }
             }
-        }
-        if (!booCaseSensitive) {
-            strTextFind = strTextFind.toLowerCase();
         }
         booCaseSensitiveLatest = booCaseSensitive;
 

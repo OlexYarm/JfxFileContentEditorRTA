@@ -39,6 +39,7 @@
         <Button fx:id="btBottomNext" onAction="#findNext" text="Next" />
         <Button fx:id="btBottomPrev" onAction="#findPrev" text="Prev" />
         <Button fx:id="btBottomAll" onAction="#findAll" text="All" />
+        <Button fx:id="btBottomCase" onAction="#findCase" text="Case" />
     </HBox>
     
     <HBox fx:id="hboxBottomReplace" visible="false">

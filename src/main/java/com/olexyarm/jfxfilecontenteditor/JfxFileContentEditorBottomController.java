@@ -25,9 +25,12 @@ import javafx.scene.control.Label;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TextField;
+import javafx.scene.layout.Background;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -61,6 +64,9 @@ public class JfxFileContentEditorBottomController {
     private Button btBottomAll;
 
     @FXML
+    private Button btBottomCase;
+
+    @FXML
     private HBox hboxBottomReplace;
 
     @FXML
@@ -85,6 +91,10 @@ public class JfxFileContentEditorBottomController {
 
     // -------------------------------------------------------------------------------------
     private Label lblBottomFindResult = null;
+
+    private boolean booCaseSensitive = false;
+    private final Paint paintBackgroundSensitive = Color.LIGHTGRAY; //DARKGREY; //DIMGRAY;
+    private final Paint paintBackgroundInsensitive = Color.GAINSBORO; //LIGHTGRAY;
 
     // -------------------------------------------------------------------------------------
     // JFX constructor
@@ -116,6 +126,9 @@ public class JfxFileContentEditorBottomController {
         hboxBottomSearchResult.managedProperty().bind(hboxBottomSearchResult.visibleProperty());
         hboxBottomFind.managedProperty().bind(hboxBottomFind.visibleProperty());
         hboxBottomReplace.managedProperty().bind(hboxBottomReplace.visibleProperty());
+        this.btBottomCase.managedProperty().bind(this.btBottomCase.visibleProperty());
+
+        this.changeSensitivity();
 
         LOGGER.debug("### Initialize JfxFileContentEditorBottomController."
                 + " this=\"" + this + "\""
@@ -178,7 +191,7 @@ public class JfxFileContentEditorBottomController {
                 + " TextFind=\"" + strTextFind + "\"");
 
         Platform.runLater(() -> {
-            String strFound = fileEditor.find(strTextFind, null, false, false);
+            String strFound = fileEditor.find(strTextFind, null, false, false, booCaseSensitive);
             this.lblBottomFindResult.setText(strFound);
             this.btBottomNext.setDisable(false);
             this.btBottomPrev.setDisable(false);
@@ -236,7 +249,7 @@ public class JfxFileContentEditorBottomController {
         }
         Tab tab = this.tabPane.getSelectionModel().getSelectedItem();
         FileContentEditor fileEditor = (FileContentEditor) tab.getContent();
-        String strFound = fileEditor.findPrev(strTextFind, null);
+        String strFound = fileEditor.findPrev(strTextFind, null, booCaseSensitive);
         this.lblBottomFindResult.setText(strFound);
         LOGGER.debug(strFound
                 + " actionEvent=\"" + actionEvent + "\""
@@ -253,7 +266,7 @@ public class JfxFileContentEditorBottomController {
 
         Tab tab = this.tabPane.getSelectionModel().getSelectedItem();
         FileContentEditor fileEditor = (FileContentEditor) tab.getContent();
-        String strFound = fileEditor.find(strTextFind, null, true, false);
+        String strFound = fileEditor.find(strTextFind, null, true, false, booCaseSensitive);
         this.lblBottomFindResult.setText(strFound);
         LOGGER.debug(strFound
                 + " actionEvent=\"" + actionEvent + "\""
@@ -278,6 +291,14 @@ public class JfxFileContentEditorBottomController {
         String strFindResult = "Fount " + intFoundCount + " occurrence" + strSuffix + " of \"" + strTextFind + "\" in " + fileEditor.getFilePath();
         this.lblBottomFindResult.setText(strFindResult);
          */
+    }
+
+    // -------------------------------------------------------------------------------------
+    @FXML
+    private void findCase(ActionEvent actionEvent) throws IOException {
+
+        this.booCaseSensitive = !this.booCaseSensitive;
+        this.changeSensitivity();
     }
 
     // -------------------------------------------------------------------------------------
@@ -326,7 +347,7 @@ public class JfxFileContentEditorBottomController {
             strTextReplace = "";
         }
 
-        String strFound = fileEditor.find(strTextFind, strTextReplace, booAll, false);
+        String strFound = fileEditor.find(strTextFind, strTextReplace, booAll, false, booCaseSensitive);
         this.lblBottomFindResult.setText(strFound);
         LOGGER.debug(strFound
                 + " actionEvent=\"" + actionEvent + "\""
@@ -401,6 +422,17 @@ public class JfxFileContentEditorBottomController {
         }
         return strTextFind;
     }
-    // -------------------------------------------------------------------------------------
 
+    // -------------------------------------------------------------------------------------
+    private void changeSensitivity() {
+
+        if (this.booCaseSensitive) {
+            this.btBottomCase.setText("Sensitive");
+            this.btBottomCase.setBackground(Background.fill(paintBackgroundSensitive));
+        } else {
+            this.btBottomCase.setText("Insensitive");
+            this.btBottomCase.setBackground(Background.fill(paintBackgroundInsensitive));
+        }
+    }
+    // -------------------------------------------------------------------------------------
 }
