@@ -1003,19 +1003,40 @@ public class FileContentEditor extends VBox {
                         //    intCharIndex = tpPrePrev.charIndex();
                         //} else
                         if (tpPrev != null) {
+                            intFoundCount--;
                             intTextPosIndex = tpPrev.index();
                             intCharIndex = tpPrev.charIndex();
+                        } else {
+                            TextPos tpLast = this.lstTextPosFound.getLast();
+                            intTextPosIndex = tpLast.index();
+                            intCharIndex = tpLast.charIndex();
                         }
                     }
                     this.textRangeSelectReplace(intTextPosIndex, intCharIndex, intCharIndex + intTextFindLen, booRevers, strTextReplace);
                     return "Found " + intFoundCount + " of " + intFoundTotal
                             + " (" + (intTextPosIndex + 1) + ":" + (intCharIndex + 1) + ").";
                 }
-                TextPos tp = this.lstTextPosFound.getFirst();
+                // TODO: Add Wrap Around setting
+                TextPos tp;
+                if (booRevers) {
+                    //if (tpPrePrev != null) {
+                    //    tp = tpPrePrev;
+                    //} else
+                    if (tpPrev != null) {
+                        tp = tpPrev;
+                    } else {
+                        intFoundCount = intFoundTotal;
+                        tp = this.lstTextPosFound.getLast();
+                    }
+                } else {
+                    intFoundCount = 1;
+                    tp = this.lstTextPosFound.getFirst();
+                }
                 int intTextPosIndex = tp.index();
                 int intCharIndex = tp.charIndex();
                 this.textRangeSelectReplace(intTextPosIndex, intCharIndex, intCharIndex + intTextFindLen, false, strTextReplace);
-                return "Found 1 of " + intFoundTotal + " (" + (intTextPosIndex + 1) + ":" + (intCharIndex + 1) + ").";
+                return "Found " + intFoundCount + " of " + intFoundTotal
+                        + " (" + (intTextPosIndex + 1) + ":" + (intCharIndex + 1) + ").";
             } else {
                 // Find first occurent of text from Current Cursor position
                 int intPosFound = this.intCaretPosOffsetCurrent;
@@ -1128,10 +1149,10 @@ public class FileContentEditor extends VBox {
             int intFoundTotal = this.lstTextPosFound.size();
             String strMore = "";
             if (!this.booFoundAllDone) {
-                strMore = " (more)";
+                strMore = "+";
             }
             return "Found 1 of " + intFoundTotal
-                    + " (" + (intParagraph + 1) + ":" + intPosFound + ")" + strMore + ".";
+                    + " (" + (intParagraph + 1) + strMore + ":" + intPosFound + ")" + ".";
         }
         return null;
     }
