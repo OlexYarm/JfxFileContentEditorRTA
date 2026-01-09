@@ -92,7 +92,7 @@ public class JfxFileContentEditorBottomController {
     // -------------------------------------------------------------------------------------
     private Label lblBottomFindResult = null;
 
-    private boolean booCaseSensitive = false;
+    private boolean booCaseSensitive = Settings.BOO_CASE_SENSITIVE;
     private final Paint paintBackgroundSensitive = Color.LIGHTGRAY; //DARKGREY; //DIMGRAY;
     private final Paint paintBackgroundInsensitive = Color.GAINSBORO; //LIGHTGRAY;
 
@@ -299,6 +299,7 @@ public class JfxFileContentEditorBottomController {
 
         this.booCaseSensitive = !this.booCaseSensitive;
         this.changeSensitivity();
+        Settings.BOO_CASE_SENSITIVE = this.booCaseSensitive;
     }
 
     // -------------------------------------------------------------------------------------

@@ -309,6 +309,16 @@ public class Settings {
     public static String STR_CHARSET_CURRENT;
 
     // -------------------------------------------------------------------------------------
+    private static final String STR_PROP_NAME_CASE_SENSITIVE = "CaseSensitive";
+    private static final boolean BOO_CASE_SENSITIVE_DEFAULT = false;
+    public static boolean BOO_CASE_SENSITIVE = false;
+
+    // -------------------------------------------------------------------------------------
+    private static final String STR_PROP_NAME_LINE_HIGHLIGHT = "Line_Higlight";
+    private static final boolean BOO_LINE_HIGHLIGHT_DEFAULT = true;
+    public static boolean BOO_LINE_HIGHLIGHT = true;
+
+    // -------------------------------------------------------------------------------------
     // -------------------------------------------------------------------------------------
     private static final Properties prop = new Properties();
 
@@ -421,6 +431,9 @@ public class Settings {
                 STR_SETTINGS_LAST_OPENED_DIR = strPropValue;
             }
 
+            BOO_CASE_SENSITIVE = getPropValueBoolean(STR_PROP_NAME_CASE_SENSITIVE, BOO_CASE_SENSITIVE_DEFAULT ? "Y" : "N");
+            BOO_LINE_HIGHLIGHT = getPropValueBoolean(STR_PROP_NAME_LINE_HIGHLIGHT, BOO_LINE_HIGHLIGHT_DEFAULT ? "Y" : "N");
+
         } catch (Exception ex) {
             LOGGER.error("Could not process property."
                     + " IOException=\"" + ex.toString() + "\"");
@@ -480,6 +493,9 @@ public class Settings {
         prop.setProperty(STR_PROP_NAME_LOG_LEVEL, STR_LOG_LEVEL);
 
         prop.setProperty(STR_PROP_NAME_LAST_OPENED_DIR, STR_SETTINGS_LAST_OPENED_DIR);
+
+        prop.setProperty(STR_PROP_NAME_CASE_SENSITIVE, BOO_CASE_SENSITIVE ? "Y" : "N");
+        prop.setProperty(STR_PROP_NAME_LINE_HIGHLIGHT, BOO_LINE_HIGHLIGHT ? "Y" : "N");
 
         LOGGER.trace("Saving Properties file."
                 + " prop=\"" + prop.toString() + "\"");
@@ -797,7 +813,7 @@ public class Settings {
         String strErr = Utils.checkDirectoryExist("", STR_SETTINGS_LAST_OPENED_DIR);
         if (strErr == null || strErr.isEmpty()) {
             return STR_SETTINGS_LAST_OPENED_DIR;
-        }else{
+        } else {
             return STR_DIRECTORY_USER_HOME_PATH;
         }
     }

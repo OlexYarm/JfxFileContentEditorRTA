@@ -169,6 +169,7 @@ public class FileContentEditor extends VBox {
         });
 
         this.richTextArea.select(textPosCaretPosition);
+        this.richTextArea.setHighlightCurrentParagraph(Settings.BOO_LINE_HIGHLIGHT);
 
         VBox.setVgrow(this.richTextArea, Priority.ALWAYS);
 

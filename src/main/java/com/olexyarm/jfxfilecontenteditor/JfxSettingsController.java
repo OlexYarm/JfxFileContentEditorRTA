@@ -64,6 +64,12 @@ public class JfxSettingsController implements Initializable {
     public RadioButton settingsBackupDisable;
 
     @FXML
+    public RadioButton settingsSensitivityYes;
+
+    @FXML
+    public RadioButton settingsSensitivityNo;
+
+    @FXML
     public TextField settingsBackupNum;
 
     @FXML
@@ -219,6 +225,62 @@ public class JfxSettingsController implements Initializable {
                 }
             });
         }
+
+        // -------------------------------------------------------------------------------------
+        // Search Sensitivity Yes/No
+        final ToggleGroup grpSensitivity = new ToggleGroup();
+        this.settingsSensitivityYes.setToggleGroup(grpSensitivity);
+        this.settingsSensitivityNo.setToggleGroup(grpSensitivity);
+
+        if (Settings.BOO_CASE_SENSITIVE) {
+            this.settingsSensitivityYes.setToggleGroup(grpSensitivity);
+            this.settingsSensitivityYes.setSelected(true);
+            this.settingsSensitivityYes.setFocusTraversable(true);
+        } else {
+            this.settingsSensitivityNo.setToggleGroup(grpSensitivity);
+            this.settingsSensitivityNo.setSelected(true);
+            this.settingsSensitivityNo.setFocusTraversable(true);
+        }
+
+        grpSensitivity.selectedToggleProperty().addListener(new ChangeListener<Toggle>() {
+            public void changed(ObservableValue<? extends Toggle> ov,
+                    Toggle old_toggle, Toggle new_toggle) {
+                LOGGER.debug("Changed settings Search Sensitivity."
+                        + " ov=" + ov
+                        + " old_toggle=" + old_toggle
+                        + " new_toggle=" + new_toggle);
+                if (new_toggle != null) {
+                    RadioButton rb = (RadioButton) new_toggle;
+                    String strID = rb.getId();
+                    if (strID == null) {
+                        LOGGER.error("Could not get RadioButton ID of settings Search Sensitivity."
+                                + " ov=" + ov
+                                + " old_toggle=" + old_toggle
+                                + " new_toggle=" + new_toggle);
+                    } else {
+                        if (strID.equalsIgnoreCase("settingsSensitivityYes")) {
+                            settingsSensitivityYes.setSelected(true);
+                            settingsSensitivityYes.setFocusTraversable(true);
+                            Settings.BOO_CASE_SENSITIVE = true;
+                            LOGGER.info("Changed settings Search Sensitivity to Yes."
+                                    + " ov=" + ov
+                                    + " old_toggle=" + old_toggle
+                                    + " new_toggle=" + new_toggle
+                                    + " ID=" + strID);
+                        } else if (strID.equalsIgnoreCase("settingsSensitivityNo")) {
+                            settingsSensitivityNo.setSelected(true);
+                            settingsSensitivityNo.setFocusTraversable(true);
+                            Settings.BOO_CASE_SENSITIVE = false;
+                            LOGGER.info("Changed settings Search Sensitivity to No."
+                                    + " ov=" + ov
+                                    + " old_toggle=" + old_toggle
+                                    + " new_toggle=" + new_toggle
+                                    + " ID=" + strID);
+                        }
+                    }
+                }
+            }
+        });
 
         // -------------------------------------------------------------------------------------
         // Backup Files Enable/Disable
