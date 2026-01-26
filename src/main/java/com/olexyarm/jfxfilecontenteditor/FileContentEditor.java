@@ -164,8 +164,8 @@ public class FileContentEditor extends VBox {
         this.richTextArea.setManaged(true);
         this.richTextArea.requestFocus();
 
-        richTextArea.getInputMap().registerFunction(RichTextArea.Tag.PASTE, () -> {
-            richTextArea.pastePlainText();
+        this.richTextArea.getInputMap().registerFunction(RichTextArea.Tag.PASTE, () -> {
+            this.richTextArea.pastePlainText();
         });
 
         this.richTextArea.select(textPosCaretPosition);
@@ -905,8 +905,8 @@ public class FileContentEditor extends VBox {
         }
 
         if (this.strTextFindLatest == null
-                || booCaseSensitive != booCaseSensitiveLatest
-                || (booCaseSensitive == booCaseSensitiveLatest && !strTextFind.equals(this.strTextFindLatest))) {
+                || booCaseSensitive != this.booCaseSensitiveLatest
+                || !strTextFind.equals(this.strTextFindLatest)) {
             this.booFoundAllDone = false;
             this.selectionClear();
             this.lstTextPosFound.clear();
@@ -922,9 +922,9 @@ public class FileContentEditor extends VBox {
         if (!booCaseSensitive) {
             strTextFind = strTextFind.toLowerCase();
         }
-        booCaseSensitiveLatest = booCaseSensitive;
+        this.booCaseSensitiveLatest = booCaseSensitive;
 
-        int intParagraphCount = richTextArea.getParagraphCount();
+        int intParagraphCount = this.richTextArea.getParagraphCount();
         if (intParagraphCount == 0) {
             String strMsg = "Could not search in empty file.";
             LOGGER.debug(strMsg + " pathFile=\"" + pathFile + "\"");
@@ -982,47 +982,38 @@ public class FileContentEditor extends VBox {
                 int intFoundTotal = this.lstTextPosFound.size();
                 int intFoundCount = 0;
                 TextPos tpPrev = null;
-                TextPos tpPrePrev = null;
                 for (TextPos tp : this.lstTextPosFound) {
                     intFoundCount++;
                     int intTextPosIndex = tp.index();
                     if (intTextPosIndex < this.intCaretPosParagraphCurrent) {
-                        tpPrePrev = tpPrev;
                         tpPrev = tp;
                         continue;
                     }
-                    int intCharIndex = tp.charIndex();
-                    if (intTextPosIndex == this.intCaretPosParagraphCurrent && intCharIndex < this.intCaretPosOffsetCurrent) {
-                        tpPrePrev = tpPrev;
+                    int intOffset = tp.offset();
+                    if (intTextPosIndex == this.intCaretPosParagraphCurrent && intOffset < this.intCaretPosCharIndexCurrent) { // this.intCaretPosOffsetCurrent) {
                         tpPrev = tp;
                         continue;
                     }
+
                     if (booRevers) {
-                        // TODO: Fix it !!!
-                        //if (tpPrePrev != null) {
-                        //    intTextPosIndex = tpPrePrev.index();
-                        //    intCharIndex = tpPrePrev.charIndex();
-                        //} else
                         if (tpPrev != null) {
                             intFoundCount--;
                             intTextPosIndex = tpPrev.index();
-                            intCharIndex = tpPrev.charIndex();
+                            intOffset = tpPrev.offset();
                         } else {
                             TextPos tpLast = this.lstTextPosFound.getLast();
                             intTextPosIndex = tpLast.index();
-                            intCharIndex = tpLast.charIndex();
+                            intOffset = tpLast.offset();
                         }
                     }
-                    this.textRangeSelectReplace(intTextPosIndex, intCharIndex, intCharIndex + intTextFindLen, booRevers, strTextReplace);
+
+                    this.textRangeSelectReplace(intTextPosIndex, intOffset, intOffset + intTextFindLen, booRevers, strTextReplace);
                     return "Found " + intFoundCount + " of " + intFoundTotal
-                            + " (" + (intTextPosIndex + 1) + ":" + (intCharIndex + 1) + ").";
+                            + " (" + (intTextPosIndex + 1) + ":" + (intOffset + 1) + ").";
                 }
                 // TODO: Add Wrap Around setting
                 TextPos tp;
                 if (booRevers) {
-                    //if (tpPrePrev != null) {
-                    //    tp = tpPrePrev;
-                    //} else
                     if (tpPrev != null) {
                         tp = tpPrev;
                     } else {
@@ -1035,75 +1026,77 @@ public class FileContentEditor extends VBox {
                 }
                 int intTextPosIndex = tp.index();
                 int intCharIndex = tp.charIndex();
-                this.textRangeSelectReplace(intTextPosIndex, intCharIndex, intCharIndex + intTextFindLen, false, strTextReplace);
+                this.textRangeSelectReplace(intTextPosIndex, intCharIndex, intCharIndex + intTextFindLen, booRevers, strTextReplace);
                 return "Found " + intFoundCount + " of " + intFoundTotal
                         + " (" + (intTextPosIndex + 1) + ":" + (intCharIndex + 1) + ").";
             } else {
-                // Find first occurent of text from Current Cursor position
-                int intPosFound = this.intCaretPosOffsetCurrent;
+                // Find first occurent of text from Current Cursor position.
+                int intPosFind = this.intCaretPosCharIndexCurrent; //this.intCaretPosOffsetCurrent;
                 if (booRevers) {
                     StringBuilder sbReverse = new StringBuilder();
                     sbReverse.append(strTextFind);
                     sbReverse.reverse();
                     String strTextFindReverse = sbReverse.toString();
-                    int intCaretPos = this.intCaretPosOffsetCurrent;
+                    // Search backward from currentparagraph to 0.
                     for (int intParagraph = this.intCaretPosParagraphCurrent; intParagraph >= 0; intParagraph--) {
-                        String strFound = this.findSubstringReverse(intParagraph, intCaretPos, strTextFindReverse, strTextReplace, booCaseSensitive);
+                        String strFound = this.findSubstringReverse(intParagraph, intPosFind, strTextFindReverse, strTextReplace, booCaseSensitive);
                         if (strFound != null) {
                             return strFound;
                         }
-                        intCaretPos = 0;
+                        intPosFind = -1;
                     }
+                    // Search paragraph backward from last to current.
                     for (int intParagraph = intParagraphCount - 1; intParagraph > this.intCaretPosParagraphCurrent; intParagraph--) {
-                        String strFound = this.findSubstringReverse(intParagraph, intCaretPos, strTextFindReverse, strTextReplace, booCaseSensitive);
+                        String strFound = this.findSubstringReverse(intParagraph, intPosFind, strTextFindReverse, strTextReplace, booCaseSensitive);
                         if (strFound != null) {
                             return strFound;
                         }
+                        intPosFind = -1;
                     }
                     return STR_NOT_FOUND;
                 }
 
                 for (int intParagraph = this.intCaretPosParagraphCurrent; intParagraph < intParagraphCount; intParagraph++) {
                     String strText = retrieveParagraph(intParagraph, booCaseSensitive);
-                    intPosFound = strText.indexOf(strTextFind, intPosFound); //this.intCaretPosOffsetCurrent);
-                    if (intPosFound >= 0) {
-                        this.textRangeSelectReplace(intParagraph, intPosFound, intPosFound + intTextFindLen, false, strTextReplace);
+                    intPosFind = strText.indexOf(strTextFind, intPosFind);
+                    if (intPosFind >= 0) {
+                        this.textRangeSelectReplace(intParagraph, intPosFind, intPosFind + intTextFindLen, false, strTextReplace);
                         LOGGER.debug("Found Text after cursor position."
                                 + " Id=\"" + this.strId + "\""
                                 + " TextFind=\"" + strTextFind + "\""
                                 + " textPosCaretPosition=\"" + textPosCaretPosition + "\""
                                 + " Paragraph=" + intParagraph
-                                + " PosFound=" + intPosFound);
+                                + " PosFound=" + intPosFind);
                         int intFoundTotal = this.lstTextPosFound.size();
                         String strMore = "";
                         if (!this.booFoundAllDone) {
                             strMore = "+";
                         }
                         return "Found 1 of " + intFoundTotal + strMore
-                                + " (" + (intParagraph + 1) + ":" + intPosFound + ")" + ".";
+                                + " (" + (intParagraph + 1) + ":" + intPosFind + ")" + ".";
                     }
-                    intPosFound = 0;
+                    intPosFind = 0;
                 }
 
                 for (int intParagraph = 0; intParagraph < this.intCaretPosParagraphCurrent; intParagraph++) {
                     String strText = retrieveParagraph(intParagraph, booCaseSensitive);
-                    intPosFound = strText.indexOf(strTextFind, intPosFound);
-                    if (intPosFound >= 0) {
-                        this.textRangeSelectReplace(intParagraph, intPosFound, intPosFound + intTextFindLen, false, strTextReplace);
+                    intPosFind = strText.indexOf(strTextFind, intPosFind);
+                    if (intPosFind >= 0) {
+                        this.textRangeSelectReplace(intParagraph, intPosFind, intPosFind + intTextFindLen, false, strTextReplace);
                         LOGGER.debug("Found Text before cursor position."
                                 + " Id=\"" + this.strId + "\""
                                 + " TextFind=\"" + strTextFind + "\""
                                 + " TextReplace=\"" + strTextReplace + "\""
                                 + " Paragraph=" + intParagraph
                                 + " textPosCaretPosition=\"" + textPosCaretPosition + "\""
-                                + " PosFound=" + intPosFound);
+                                + " PosFound=" + intPosFind);
                         int intFoundTotal = this.lstTextPosFound.size();
                         String strMore = "";
                         if (!this.booFoundAllDone) {
                             strMore = "+";
                         }
                         return "Found 1 of " + intFoundTotal + strMore
-                                + " (" + (intParagraph + 1) + ":" + intPosFound + ")" + ".";
+                                + " (" + (intParagraph + 1) + ":" + intPosFind + ")" + ".";
                     }
                 }
                 this.selectionClear();
@@ -1128,6 +1121,9 @@ public class FileContentEditor extends VBox {
     // -------------------------------------------------------------------------------------
     public String findSubstringReverse(int intParagraph, int intCaretPosCurrent, String strTextFindReverse, String strTextReplace, boolean booCaseSensitive) {
 
+        if (intCaretPosCurrent == 0) {
+            return null;
+        }
         String strText = retrieveParagraph(intParagraph, booCaseSensitive);
         StringBuilder sbReverse = new StringBuilder();
         sbReverse.append(strText);
@@ -1191,8 +1187,8 @@ public class FileContentEditor extends VBox {
                 .setTextColor(Color.RED)
                 .build();
 
-        TextPos textPosStart = new TextPos(intParagraph, intPosStart, intPosStart, false);
-        TextPos textPosEnd = new TextPos(intParagraph, intPosEnd, intPosEnd - 1, false);
+        TextPos textPosStart = new TextPos(intParagraph, intPosStart, 0, false);
+        TextPos textPosEnd = new TextPos(intParagraph, intPosEnd, (booReverse) ? intPosStart : intPosEnd, true);
         // TODO: set booFoundAllDone when all text were searched !!!
         //if (strReplace == null && this.lstTextPosFound.contains(textPosStart)) {
         //    this.richTextArea.select(textPosStart, textPosEnd);
@@ -1201,16 +1197,6 @@ public class FileContentEditor extends VBox {
 
         this.model.applyStyle(textPosStart, textPosEnd, this.mapStyleAttrSelection, false);
         this.richTextArea.select(textPosStart, textPosEnd);
-
-        if (booReverse) {
-            int intPosCursor = intPosStart - 1;
-            if (intPosCursor < 0) {
-                intPosCursor = 0;
-            }
-            TextPos textPosCursor = new TextPos(intParagraph, intPosCursor, intPosCursor, false);
-            this.richTextArea.select(textPosCursor, textPosCursor);
-        }
-
         this.richTextArea.requestFocus();
 
         if (strReplace != null) {
@@ -1223,7 +1209,7 @@ public class FileContentEditor extends VBox {
             }
         }
 
-        LOGGER.debug("textRangeSelectReplace."
+        LOGGER.trace("textRangeSelectReplace."
                 + " Id=\"" + this.strId + "\""
                 + " Paragraph=" + intParagraph
                 + " PosStart=" + intPosStart

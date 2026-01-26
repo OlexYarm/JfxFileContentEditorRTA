@@ -79,6 +79,9 @@ public class JfxFileContentEditorBottomController {
     private Label hboxBottomLabelVersion;
 
     @FXML
+    private TextField tfBottomCursorPos;
+
+    @FXML
     private TextField tfBottomLineEnding;
 
     @FXML
@@ -123,25 +126,25 @@ public class JfxFileContentEditorBottomController {
         Utils.MAP_NODE_REFS.put(
                 Utils.NODE_NAMES.tfBottomCharset.toString(), tfBottomCharset);
 
-        hboxBottomSearchResult.managedProperty().bind(hboxBottomSearchResult.visibleProperty());
-        hboxBottomFind.managedProperty().bind(hboxBottomFind.visibleProperty());
-        hboxBottomReplace.managedProperty().bind(hboxBottomReplace.visibleProperty());
+        this.hboxBottomSearchResult.managedProperty().bind(this.hboxBottomSearchResult.visibleProperty());
+        this.hboxBottomFind.managedProperty().bind(this.hboxBottomFind.visibleProperty());
+        this.hboxBottomReplace.managedProperty().bind(this.hboxBottomReplace.visibleProperty());
         this.btBottomCase.managedProperty().bind(this.btBottomCase.visibleProperty());
 
         this.changeSensitivity();
 
         LOGGER.debug("### Initialize JfxFileContentEditorBottomController."
                 + " this=\"" + this + "\""
-                + " vboxBottom=\"" + vboxBottom + "\""
-                + " hboxBottomSearchResult=\"" + hboxBottomSearchResult + "\""
-                + " hboxBottomFind=\"" + hboxBottomFind + "\""
-                + " tfBottomFind=\"" + tfBottomFind + "\""
-                + " hboxBottomReplace=\"" + hboxBottomReplace + "\""
-                + " tfBottomReplace=\"" + tfBottomReplace + "\""
-                + " hboxBottomVersion=\"" + hboxBottomVersion + "\""
-                + " hboxBottomLabelVersion=\"" + hboxBottomLabelVersion + "\""
-                + " tfBottomLineEnding=\"" + tfBottomLineEnding + "\""
-                + " tfBottomCharset=\"" + tfBottomCharset + "\""
+                + " vboxBottom=\"" +this. vboxBottom + "\""
+                + " hboxBottomSearchResult=\"" + this.hboxBottomSearchResult + "\""
+                + " hboxBottomFind=\"" + this.hboxBottomFind + "\""
+                + " tfBottomFind=\"" + this.tfBottomFind + "\""
+                + " hboxBottomReplace=\"" + this.hboxBottomReplace + "\""
+                + " tfBottomReplace=\"" + this.tfBottomReplace + "\""
+                + " hboxBottomVersion=\"" + this.hboxBottomVersion + "\""
+                + " hboxBottomLabelVersion=\"" + this.hboxBottomLabelVersion + "\""
+                + " tfBottomLineEnding=\"" + this.tfBottomLineEnding + "\""
+                + " tfBottomCharset=\"" + this.tfBottomCharset + "\""
         );
     }
 

@@ -51,6 +51,11 @@
     <HBox fx:id="hboxBottomVersion" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml">
         <Label fx:id="hboxBottomLabelVersion" />
         <Region HBox.hgrow="ALWAYS" />
+        
+        <TextField fx:id="tfBottomCursorPos" alignment="CENTER" disable="true"
+                   style="-fx-font-size:10px; -fx-background-color:rgba(0,0,0,0); -fx-border-width:2; -fx-border-style:hidden solid hidden solid; -fx-border-color:lightgrey;"/>
+        
+        
         <TextField fx:id="tfBottomLineEnding" alignment="CENTER" disable="true"
                    style="-fx-font-size:10px; -fx-background-color:rgba(0,0,0,0); -fx-border-width:2; -fx-border-style:hidden solid hidden solid; -fx-border-color:lightgrey;"/>
         <TextField fx:id="tfBottomCharset" alignment="CENTER" disable="true"

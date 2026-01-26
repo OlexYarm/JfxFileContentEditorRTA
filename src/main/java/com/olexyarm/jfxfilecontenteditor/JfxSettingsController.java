@@ -101,11 +101,11 @@ public class JfxSettingsController implements Initializable {
         this.settingsShowToolbarDisable.setToggleGroup(grpShowToolbar);
 
         if (Settings.BOO_SHOW_TOOLBAR_EABLED) {
-            this.settingsShowToolbarEnable.setToggleGroup(grpShowToolbar);
+            //this.settingsShowToolbarEnable.setToggleGroup(grpShowToolbar);
             this.settingsShowToolbarEnable.setSelected(true);
             this.settingsShowToolbarEnable.setFocusTraversable(true);
         } else {
-            this.settingsShowToolbarDisable.setToggleGroup(grpShowToolbar);
+            //this.settingsShowToolbarDisable.setToggleGroup(grpShowToolbar);
             this.settingsShowToolbarDisable.setSelected(true);
             this.settingsShowToolbarDisable.setFocusTraversable(true);
         }
@@ -361,7 +361,7 @@ public class JfxSettingsController implements Initializable {
                     }
                 } catch (Exception e) {
                     //observable.setValue(oldValue);
-                    LOGGER.error("Couls not changed settings Backup-Files Number."
+                    LOGGER.error("Could not change settings Backup-Files Number."
                             + " observable=" + observable
                             + " oldValue=\"" + oldValue + "\""
                             + " newValue=\"" + newValue + "\""
@@ -389,7 +389,7 @@ public class JfxSettingsController implements Initializable {
                     }
                 } catch (Exception e) {
                     //observable.setValue(oldValue);
-                    LOGGER.error("Could not changed settings Tabss Number."
+                    LOGGER.error("Could not change settings Tabs Number."
                             + " observable=" + observable
                             + " oldValue=\"" + oldValue + "\""
                             + " newValue=\"" + newValue + "\""
