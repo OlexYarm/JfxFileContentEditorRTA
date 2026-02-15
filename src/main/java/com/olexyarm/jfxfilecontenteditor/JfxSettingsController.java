@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024, Oleksandr Yarmolenko. All rights reserved.
+ * Copyright (c) 2024, 2025, 2026 Oleksandr Yarmolenko. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -35,7 +35,7 @@ import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class JfxSettingsController implements Initializable {
+class JfxSettingsController implements Initializable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(JfxSettingsController.class);
 
@@ -79,10 +79,10 @@ public class JfxSettingsController implements Initializable {
     public TextField settingsFontSize;
 
     @FXML
-    public ListView settingsFontFamily;
+    public ListView<String> settingsFontFamily;
 
     @FXML
-    public ChoiceBox cbSettingsLogLevel;
+    public ChoiceBox<String> cbSettingsLogLevel;
 
     @FXML
     public Button lblSettingsDone;
@@ -111,6 +111,7 @@ public class JfxSettingsController implements Initializable {
         }
 
         grpShowToolbar.selectedToggleProperty().addListener(new ChangeListener<Toggle>() {
+            @Override
             public void changed(ObservableValue<? extends Toggle> ov,
                     Toggle old_toggle, Toggle new_toggle) {
                 RadioButton rb = (RadioButton) new_toggle;
@@ -161,6 +162,7 @@ public class JfxSettingsController implements Initializable {
         }
 
         grpAutosaveFiles.selectedToggleProperty().addListener(new ChangeListener<Toggle>() {
+            @Override
             public void changed(ObservableValue<? extends Toggle> ov,
                     Toggle old_toggle, Toggle new_toggle) {
                 RadioButton rb = (RadioButton) new_toggle;
@@ -243,6 +245,7 @@ public class JfxSettingsController implements Initializable {
         }
 
         grpSensitivity.selectedToggleProperty().addListener(new ChangeListener<Toggle>() {
+            @Override
             public void changed(ObservableValue<? extends Toggle> ov,
                     Toggle old_toggle, Toggle new_toggle) {
                 LOGGER.debug("Changed settings Search Sensitivity."
@@ -299,6 +302,7 @@ public class JfxSettingsController implements Initializable {
         }
 
         grpBackupFiles.selectedToggleProperty().addListener(new ChangeListener<Toggle>() {
+            @Override
             public void changed(ObservableValue<? extends Toggle> ov,
                     Toggle old_toggle, Toggle new_toggle) {
                 LOGGER.debug("Changed settings Backup-Files."

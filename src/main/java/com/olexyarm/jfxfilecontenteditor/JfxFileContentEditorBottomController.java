@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024, Oleksandr Yarmolenko. All rights reserved.
+ * Copyright (c) 2024, 2025, 2026 Oleksandr Yarmolenko. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -46,13 +46,16 @@ public class JfxFileContentEditorBottomController {
     private VBox vboxBottom;
 
     @FXML
-    private HBox hboxBottomSearchResult;
+    HBox hboxBottomSearchResult;
 
     @FXML
-    private HBox hboxBottomFind;
+    HBox hboxBottomFind;
 
     @FXML
-    private TextField tfBottomFind;
+    Label lblBottomSearchResult;
+
+    @FXML
+    TextField tfBottomFind;
 
     @FXML
     private Button btBottomNext;
@@ -67,10 +70,10 @@ public class JfxFileContentEditorBottomController {
     private Button btBottomCase;
 
     @FXML
-    private HBox hboxBottomReplace;
+    HBox hboxBottomReplace;
 
     @FXML
-    private TextField tfBottomReplace;
+    TextField tfBottomReplace;
 
     @FXML
     private HBox hboxBottomVersion;
@@ -79,7 +82,7 @@ public class JfxFileContentEditorBottomController {
     private Label hboxBottomLabelVersion;
 
     @FXML
-    private TextField tfBottomCursorPos;
+    TextField tfBottomCursorPos;
 
     @FXML
     private TextField tfBottomLineEnding;
@@ -133,9 +136,9 @@ public class JfxFileContentEditorBottomController {
 
         this.changeSensitivity();
 
-        LOGGER.debug("### Initialize JfxFileContentEditorBottomController."
+        LOGGER.trace("### Initialize JfxFileContentEditorBottomController."
                 + " this=\"" + this + "\""
-                + " vboxBottom=\"" +this. vboxBottom + "\""
+                + " vboxBottom=\"" + this.vboxBottom + "\""
                 + " hboxBottomSearchResult=\"" + this.hboxBottomSearchResult + "\""
                 + " hboxBottomFind=\"" + this.hboxBottomFind + "\""
                 + " tfBottomFind=\"" + this.tfBottomFind + "\""
@@ -143,6 +146,7 @@ public class JfxFileContentEditorBottomController {
                 + " tfBottomReplace=\"" + this.tfBottomReplace + "\""
                 + " hboxBottomVersion=\"" + this.hboxBottomVersion + "\""
                 + " hboxBottomLabelVersion=\"" + this.hboxBottomLabelVersion + "\""
+                + " tfBottomCursorPos=\"" + this.tfBottomCursorPos
                 + " tfBottomLineEnding=\"" + this.tfBottomLineEnding + "\""
                 + " tfBottomCharset=\"" + this.tfBottomCharset + "\""
         );
@@ -203,21 +207,6 @@ public class JfxFileContentEditorBottomController {
                     + " actionEvent=\"" + actionEvent + "\""
                     + " TextFind=\"" + strTextFind + "\"");
         });
-        /*
-        if (intFoundCount < 1) {
-            String strErrMsg = "No occurrence of \"" + strTextFind + "\" found in " + fileEditor.getFilePath();
-            LOGGER.debug(strErrMsg
-                    + " actionEvent=\"" + actionEvent + "\""
-                    + " TextFind=\"" + strTextFind + "\"");
-            this.lblBottomFindResult.setText(strErrMsg);
-        } else {
-            String strMsg = "Found occurrence of \"" + strTextFind + "\" in " + fileEditor.getFilePath();
-            LOGGER.debug(strMsg
-                    + " actionEvent=\"" + actionEvent + "\""
-                    + " TextFind=\"" + strTextFind + "\"");
-            this.lblBottomFindResult.setText(strMsg);
-        }
-         */
     }
 
     private String validateFindValue() {
@@ -274,26 +263,6 @@ public class JfxFileContentEditorBottomController {
         LOGGER.debug(strFound
                 + " actionEvent=\"" + actionEvent + "\""
                 + " TextFind=\"" + strTextFind + "\"");
-
-        /*        
-        int intFoundCount = fileEditor.find(strTextFind, null, true);
-        if (intFoundCount < 1) {
-            String strErrMsg = "No occurrence of \"" + strTextFind + "\" found in " + fileEditor.getFilePath();
-            LOGGER.debug(strErrMsg
-                    + " actionEvent=\"" + actionEvent + "\""
-                    + " TextFind=\"" + strTextFind + "\"");
-            this.lblBottomFindResult.setText(strErrMsg);
-            return;
-        }
-        String strSuffix;
-        if (intFoundCount == 1) {
-            strSuffix = "";
-        } else {
-            strSuffix = "s";
-        }
-        String strFindResult = "Fount " + intFoundCount + " occurrence" + strSuffix + " of \"" + strTextFind + "\" in " + fileEditor.getFilePath();
-        this.lblBottomFindResult.setText(strFindResult);
-         */
     }
 
     // -------------------------------------------------------------------------------------
@@ -342,7 +311,7 @@ public class JfxFileContentEditorBottomController {
         FileContentEditor fileEditor = (FileContentEditor) tab.getContent();
 
         String strNodeID = "tfBottomReplace";
-        TextField tfTextField = (TextField) Utils.lookupNodeByID(this.borderPaneEditor, TextField.class, strNodeID);
+        TextField tfTextField = Utils.lookupNodeByID(this.borderPaneEditor, TextField.class, strNodeID);
         String strTextReplace = tfTextField.getText();
         LOGGER.debug("Replace Text."
                 + " actionEvent=\"" + actionEvent + "\""
@@ -356,28 +325,6 @@ public class JfxFileContentEditorBottomController {
         LOGGER.debug(strFound
                 + " actionEvent=\"" + actionEvent + "\""
                 + " TextFind=\"" + strTextFind + "\"");
-        /*
-        int intFoundCount;
-        intFoundCount = fileEditor.find(strTextFind, strTextReplace, booAll);
-        if (intFoundCount < 1) {
-            String strErrMsg = "No occurrence of \"" + strTextFind + "\" found in " + fileEditor.getFilePath();
-            LOGGER.debug(strErrMsg
-                    + " actionEvent=\"" + actionEvent + "\""
-                    + " TextFind=\"" + strTextFind + "\""
-                    + " TextReplace=\"" + strTextReplace + "\"");
-            this.lblBottomFindResult.setText(strErrMsg);
-            return;
-        }
-        String strResult;
-        if (intFoundCount == 1) {
-            strResult = "";
-        } else {
-            strResult = "s";
-        }
-        String strFindResult = intFoundCount + " substring" + strResult + " updated in " + fileEditor.getFilePath();
-        this.lblBottomFindResult.setText(strFindResult);
-
-         */
     }
 
     private boolean findLabelBottomSearchResult() {
@@ -385,12 +332,12 @@ public class JfxFileContentEditorBottomController {
         if (this.lblBottomFindResult == null) {
             String strNodeID = "lblBottomSearchResult";
             String strNodeClassName = Label.class.getName();
-            this.lblBottomFindResult = (Label) Utils.lookupNodeByID(this.borderPaneEditor, Label.class, strNodeID);
+            this.lblBottomFindResult = Utils.lookupNodeByID(this.borderPaneEditor, Label.class, strNodeID);
             if (this.lblBottomFindResult == null) {
                 String strErrMsg = "Could not find Node."
                         + " NodeID=\"" + strNodeID + "\" "
                         + " NodeClassName=\"" + strNodeClassName + "\"";
-                LOGGER.info(strErrMsg);
+                LOGGER.error(strErrMsg);
                 // TODO: add error message on screen
                 return false;
             }
@@ -404,12 +351,12 @@ public class JfxFileContentEditorBottomController {
         if (this.tfBottomFind == null) {
             String strNodeID = "tfBottomFind";
             String strNodeClassName = TextField.class.getName();
-            this.tfBottomFind = (TextField) Utils.lookupNodeByID(this.borderPaneEditor, TextField.class, strNodeID);
+            this.tfBottomFind = Utils.lookupNodeByID(this.borderPaneEditor, TextField.class, strNodeID);
             if (this.tfBottomFind == null) {
                 String strErrMsg = "Could not find Node."
                         + " NodeID=\"" + strNodeID + "\" "
                         + " NodeClassName=\"" + strNodeClassName + "\"";
-                LOGGER.info(strErrMsg);
+                LOGGER.error(strErrMsg);
                 // TODO: add error message on screen
                 return null;
             }

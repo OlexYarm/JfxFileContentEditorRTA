@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024, Oleksandr Yarmolenko. All rights reserved.
+ * Copyright (c) 2024, 2025, 2026 Oleksandr Yarmolenko. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -53,6 +53,7 @@ import javafx.geometry.Insets;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.TabPane;
+import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
@@ -67,9 +68,10 @@ import jfx.incubator.scene.control.richtext.model.StyledTextModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class FileContentEditor extends VBox {
+class FileContentEditor extends VBox {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FileContentEditor.class);
+
     private static final byte BYT_CR = 0x0D;
     private static final byte BYT_LF = 0x0A;
     private static final String STR_CR_LF_WIN = "Win CRLF";
@@ -83,6 +85,8 @@ public class FileContentEditor extends VBox {
         No, Win, Unix
     };
     private enuLineEnding enuLineEndType = enuLineEnding.No;
+
+    private final FileContentEditorState stateEditor = new FileContentEditorState();
 
     private Path pathFile;
     private String strFilePath;
@@ -123,6 +127,7 @@ public class FileContentEditor extends VBox {
     private int intCaretPosParagraphCurrent;
     private int intCaretPosOffsetCurrent;
     private int intCaretPosCharIndexCurrent;
+    private TextField tfPosCaret;
 
     private Font font;
 
@@ -203,6 +208,13 @@ public class FileContentEditor extends VBox {
                 intCaretPosParagraphCurrent = textPosCaretPosition.index();
                 intCaretPosOffsetCurrent = textPosCaretPosition.offset();
                 intCaretPosCharIndexCurrent = textPosCaretPosition.charIndex();
+                if (tfPosCaret != null) {
+                    String strCursorPos = "Paragraph:" + intCaretPosParagraphCurrent
+                            + " Offser:" + intCaretPosOffsetCurrent
+                            + " CharIndex:" + intCaretPosCharIndexCurrent + "";
+                    tfPosCaret.setText(strCursorPos);
+                    tfPosCaret.setPrefWidth(strCursorPos.length() * 6);
+                }
                 LOGGER.trace("textPosCaretPositionChangeListener."
                         + " Id=\"" + strId + "\""
                         + " FileName=\"" + strFileName + "\""
@@ -257,6 +269,7 @@ public class FileContentEditor extends VBox {
         this.booPropFocusedProperty = this.richTextArea.focusedProperty();
         this.booPropFocusedProperty.addListener(this.focusedPropertyChangeListener);
 
+        // -------------------------------------------------------------------------------------
         // ---------- registerListeners - end ------------------------------------------------
         // ---------- init vars - begin ------------------------------------------------------
         this.booFoundAllDone = false;
@@ -786,7 +799,7 @@ public class FileContentEditor extends VBox {
             this.serviceFileSave.onScheduledProperty().set(new EventHandler<WorkerStateEvent>() {
                 @Override
                 public void handle(WorkerStateEvent event) {
-                    EventType eventType = event.getEventType();
+                    EventType<?> eventType = event.getEventType();
                     event.consume();
 
                     richTextArea.getModel().removeListener(stmChangeListenerFileContent);
@@ -809,7 +822,7 @@ public class FileContentEditor extends VBox {
             this.serviceFileSave.onRunningProperty().set(new EventHandler<WorkerStateEvent>() {
                 @Override
                 public void handle(WorkerStateEvent event) {
-                    EventType eventType = event.getEventType();
+                    EventType<?> eventType = event.getEventType();
                     event.consume();
                     LOGGER.debug("onRunningProperty serviceFileSave."
                             + " Id=\"" + strId + "\""
@@ -821,7 +834,7 @@ public class FileContentEditor extends VBox {
             this.serviceFileSave.onFailedProperty().set(new EventHandler<WorkerStateEvent>() {
                 @Override
                 public void handle(WorkerStateEvent event) {
-                    EventType eventType = event.getEventType();
+                    EventType<?> eventType = event.getEventType();
 
                     richTextArea.getModel().addListener(stmChangeListenerFileContent);
                     textPosCaretPositionProperty.addListener(textPosCaretPositionChangeListener);
@@ -843,7 +856,7 @@ public class FileContentEditor extends VBox {
             this.serviceFileSave.onSucceededProperty().set(new EventHandler<WorkerStateEvent>() {
                 @Override
                 public void handle(WorkerStateEvent event) {
-                    EventType eventType = event.getEventType();
+                    EventType<?> eventType = event.getEventType();
                     event.consume();
 
                     richTextArea.getModel().addListener(stmChangeListenerFileContent);
@@ -995,6 +1008,7 @@ public class FileContentEditor extends VBox {
                         continue;
                     }
 
+                    int intCaretPos = intOffset + intTextFindLen;
                     if (booRevers) {
                         if (tpPrev != null) {
                             intFoundCount--;
@@ -1005,11 +1019,12 @@ public class FileContentEditor extends VBox {
                             intTextPosIndex = tpLast.index();
                             intOffset = tpLast.offset();
                         }
+                        intCaretPos = intOffset;
                     }
 
                     this.textRangeSelectReplace(intTextPosIndex, intOffset, intOffset + intTextFindLen, booRevers, strTextReplace);
                     return "Found " + intFoundCount + " of " + intFoundTotal
-                            + " (" + (intTextPosIndex + 1) + ":" + (intOffset + 1) + ").";
+                            + " (" + (intTextPosIndex + 1) + ":" + intCaretPos + ").";
                 }
                 // TODO: Add Wrap Around setting
                 TextPos tp;
@@ -1025,10 +1040,14 @@ public class FileContentEditor extends VBox {
                     tp = this.lstTextPosFound.getFirst();
                 }
                 int intTextPosIndex = tp.index();
-                int intCharIndex = tp.charIndex();
-                this.textRangeSelectReplace(intTextPosIndex, intCharIndex, intCharIndex + intTextFindLen, booRevers, strTextReplace);
+                int intOffset = tp.offset();
+                int intCaretPos = intOffset;
+                if (!booRevers) {
+                    intCaretPos += intTextFindLen;
+                }
+                this.textRangeSelectReplace(intTextPosIndex, intOffset, intOffset + intTextFindLen, booRevers, strTextReplace);
                 return "Found " + intFoundCount + " of " + intFoundTotal
-                        + " (" + (intTextPosIndex + 1) + ":" + (intCharIndex + 1) + ").";
+                        + " (" + (intTextPosIndex + 1) + ":" + intCaretPos + ").";
             } else {
                 // Find first occurent of text from Current Cursor position.
                 int intPosFind = this.intCaretPosCharIndexCurrent; //this.intCaretPosOffsetCurrent;
@@ -1073,7 +1092,7 @@ public class FileContentEditor extends VBox {
                             strMore = "+";
                         }
                         return "Found 1 of " + intFoundTotal + strMore
-                                + " (" + (intParagraph + 1) + ":" + intPosFind + ")" + ".";
+                                + " (" + (intParagraph + 1) + ":" + (intPosFind + intTextFindLen) + ")" + ".";
                     }
                     intPosFind = 0;
                 }
@@ -1096,7 +1115,7 @@ public class FileContentEditor extends VBox {
                             strMore = "+";
                         }
                         return "Found 1 of " + intFoundTotal + strMore
-                                + " (" + (intParagraph + 1) + ":" + intPosFind + ")" + ".";
+                                + " (" + (intParagraph + 1) + ":" + (intPosFind + intTextFindLen) + ")" + ".";
                     }
                 }
                 this.selectionClear();
@@ -1148,8 +1167,8 @@ public class FileContentEditor extends VBox {
             if (!this.booFoundAllDone) {
                 strMore = "+";
             }
-            return "Found 1 of " + intFoundTotal
-                    + " (" + (intParagraph + 1) + strMore + ":" + intPosFound + ")" + ".";
+            return "Found 1 of " + intFoundTotal + strMore
+                    + " (" + (intParagraph + 1) + ":" + intPosFound + ")" + ".";
         }
         return null;
     }
@@ -1200,7 +1219,8 @@ public class FileContentEditor extends VBox {
         this.richTextArea.requestFocus();
 
         if (strReplace != null) {
-            this.richTextArea.replaceText(textPosStart, textPosEnd, strReplace, true);
+            //this.richTextArea.replaceText(textPosStart, textPosEnd, strReplace, true); from 26-ea+16 removed boolean allowUndo
+            this.richTextArea.replaceText(textPosStart, textPosEnd, strReplace);
         } else {
             if (this.lstTextPosFound.contains(textPosStart)) {
                 //this.booFoundAllDone = true;
@@ -1490,7 +1510,7 @@ public class FileContentEditor extends VBox {
             this.taskFileLoad.onScheduledProperty().set(new EventHandler<WorkerStateEvent>() {
                 @Override
                 public void handle(WorkerStateEvent event) {
-                    EventType eventType = event.getEventType();
+                    EventType<?> eventType = event.getEventType();
                     progressBar.progressProperty().bind(taskFileLoad.progressProperty());
                     lblFileState.textProperty().bind(taskFileLoad.messageProperty());
 
@@ -1508,7 +1528,7 @@ public class FileContentEditor extends VBox {
             this.taskFileLoad.onRunningProperty().set(new EventHandler<WorkerStateEvent>() {
                 @Override
                 public void handle(WorkerStateEvent event) {
-                    EventType eventType = event.getEventType();
+                    EventType<?> eventType = event.getEventType();
                     LOGGER.debug("onRunningProperty."
                             + " Id=\"" + strId + "\""
                             + " eventType=\"" + eventType + "\""
@@ -1521,7 +1541,7 @@ public class FileContentEditor extends VBox {
             this.taskFileLoad.onFailedProperty().set(new EventHandler<WorkerStateEvent>() {
                 @Override
                 public void handle(WorkerStateEvent event) {
-                    EventType eventType = event.getEventType();
+                    EventType<?> eventType = event.getEventType();
                     String strErrMsg = lblFileState.textProperty().getValue()
                             + "\nFile=" + lblFileName.getText()
                             + "\nTry to Open File with different Charset or Open File Binary.";
@@ -1547,11 +1567,11 @@ public class FileContentEditor extends VBox {
                     ReadOnlyObjectProperty<Worker.State> stateProperty = taskFileLoad.stateProperty();
                     Worker.State state = stateProperty.getValue();
                     String stateName = state.name();
-                    EventType eventType = event.getEventType();
+                    EventType<?> eventType = event.getEventType();
                     String strText;
                     int intTextLen = 0;
                     try {
-                        strText = (String) taskFileLoad.get();
+                        strText = taskFileLoad.get();
                     } catch (InterruptedException | ExecutionException ex) {
                         LOGGER.error("onSucceededProperty."
                                 + " Id=\"" + strId + "\""
@@ -1717,5 +1737,14 @@ public class FileContentEditor extends VBox {
         this.tabPane = tabPane;
     }
 
+    // -------------------------------------------------------------------------------------
+    public FileContentEditorState getState() {
+        return this.stateEditor;
+    }
+
+    // -------------------------------------------------------------------------------------
+    public void setCaretPos(TextField tfPosCaret) {
+        this.tfPosCaret = tfPosCaret;
+    }
     // -------------------------------------------------------------------------------------
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024, Oleksandr Yarmolenko. All rights reserved.
+ * Copyright (c) 2024, 2025, 2026 Oleksandr Yarmolenko. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -14,15 +14,13 @@
  */
 package com.olexyarm.jfxfilecontenteditor;
 
-//import javafx.concurrent.Worker;
-//import javafx.concurrent.WorkerStateEvent;
 import javafx.event.Event;
 import javafx.event.EventTarget;
 import javafx.event.EventType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class EventFileRead extends Event { //WorkerStateEvent {
+class EventFileRead extends Event { 
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EventFileRead.class);
     public static final EventType<EventFileRead> _FILE_READ = new EventType<>(ANY, "_FILE_READ");

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024, Oleksandr Yarmolenko. All rights reserved.
+ * Copyright (c) 2024, 2025, 2026 Oleksandr Yarmolenko. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -44,7 +44,7 @@ import java.awt.Dimension;
 import java.util.Arrays;
 import javafx.scene.image.Image;
 
-public class Settings {
+class Settings {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Settings.class);
 
@@ -59,7 +59,7 @@ public class Settings {
     private static final String STR_VERSION_FILENAME = "version.txt";
 
     private static final String STR_APP_ICON_FILENAME = "img/icons8-editor-64.png";
-    public static Image IMG_APP_ICON;
+    static Image IMG_APP_ICON;
 
     static {
         try (InputStream is = Settings.class.getResourceAsStream(STR_VERSION_FILENAME); BufferedReader br = new BufferedReader(new InputStreamReader(is))) {
@@ -136,9 +136,9 @@ public class Settings {
     public static final String STR_DIRECTORY_USER_HOME_DIR = System.getProperty(STR_DIRECTORY_USER_DIR);
 
     private static final List<String> LST_FONT_FAMILIES = Font.getFamilies();
-    public static final ObservableList<String> OBS_LST_VIEW_FONT_FAMILIES = FXCollections.observableArrayList(LST_FONT_FAMILIES);
+    static final ObservableList<String> OBS_LST_VIEW_FONT_FAMILIES = FXCollections.observableArrayList(LST_FONT_FAMILIES);
 
-    public static final Font FONT_OS_DEFAULT = Font.getDefault();
+    static final Font FONT_OS_DEFAULT = Font.getDefault();
     public static final String STR_FONT_FAMILY_OS_DEFAULT = FONT_OS_DEFAULT.getFamily();
     public static final double DOUBLE_FONT_SIZE_OS_DEFAULT = FONT_OS_DEFAULT.getSize();
 
@@ -689,7 +689,7 @@ public class Settings {
     }
 
     // -------------------------------------------------------------------------------------
-    public static Font getFontDefault() {
+    static Font getFontDefault() {
 
         return FONT_CURRENT;
     }
@@ -730,7 +730,7 @@ public class Settings {
     }
 
     // -------------------------------------------------------------------------------------
-    public static ObservableList<String> getObsLstFontCharsetsStandard() {
+    static ObservableList<String> getObsLstFontCharsetsStandard() {
 
         //https://docs.oracle.com/javase/8/docs/api/java/nio/charset/Charset.html
         List<String> lst = new ArrayList<>(Arrays.asList("US-ASCII", "ISO-8859-1", "UTF-8", "UTF-16BE", "UTF-16LE", "UTF-16"));
@@ -739,7 +739,7 @@ public class Settings {
     }
 
     // -------------------------------------------------------------------------------------
-    public static ObservableList<String> getObsLstFontCharsets() {
+    static ObservableList<String> getObsLstFontCharsets() {
 
         Set<String> keyset = MAP_CHARSETS_AVAILABLE.keySet();
         List<String> lst = new ArrayList<>(keyset);
@@ -776,27 +776,20 @@ public class Settings {
             strLogLevelStartWith = strLogLevel.substring(0, 1);
         }
         switch (strLogLevelStartWith) {
-            case "T":
+            case "T" ->
                 loggerContext.getLogger("com.olexyarm.jfxfilecontenteditor").setLevel(Level.TRACE);
-                break;
-            case "D":
+            case "D" ->
                 loggerContext.getLogger("com.olexyarm.jfxfilecontenteditor").setLevel(Level.DEBUG);
-                break;
-            case "I":
+            case "I" ->
                 loggerContext.getLogger("com.olexyarm.jfxfilecontenteditor").setLevel(Level.INFO);
-                break;
-            case "W":
+            case "W" ->
                 loggerContext.getLogger("com.olexyarm.jfxfilecontenteditor").setLevel(Level.WARN);
-                break;
-            case "E":
+            case "E" ->
                 loggerContext.getLogger("com.olexyarm.jfxfilecontenteditor").setLevel(Level.ERROR);
-                break;
-            case "O":
+            case "O" ->
                 loggerContext.getLogger("com.olexyarm.jfxfilecontenteditor").setLevel(Level.OFF);
-                break;
-            default:
+            default ->
                 loggerContext.getLogger("com.olexyarm.jfxfilecontenteditor").setLevel(Level.OFF);
-                break;
         }
         Level levelLogAfter = loggerContext.getLogger("com.olexyarm.jfxfilecontenteditor").getLevel();
         LOGGER.debug("applyLogLevel After."

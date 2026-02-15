@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024, Oleksandr Yarmolenko. All rights reserved.
+ * Copyright (c) 2024, 2025, 2026 Oleksandr Yarmolenko. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -24,46 +24,46 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class JfxFileContentEditorController {
-    
+
     private static final Logger LOGGER = LoggerFactory.getLogger(JfxFileContentEditorController.class);
 
     // -------------------------------------------------------------------------------------
     @FXML
     public JfxFileContentEditorMenuController jfxEditorMenuController;
-    
+
     @FXML
     public JfxFileContentEditorBottomController jfxEditorBottomController;
 
     // -------------------------------------------------------------------------------------
     @FXML
-    public BorderPane borderPaneEditor;
-    
+    BorderPane borderPaneEditor;
+
     @FXML
-    public HBox jfxEditorMenu;
-    
+    HBox jfxEditorMenu;
+
     @FXML
-    public TabPane tabPaneEditor;
-    
+    TabPane tabPaneEditor;
+
     @FXML
-    public VBox jfxEditorBottom;
+    VBox jfxEditorBottom;
 
     // -------------------------------------------------------------------------------------
     // JFX constructor
     // -------------------------------------------------------------------------------------
     @FXML
     public void initialize() {
-        
-        tabPaneEditor.setTabDragPolicy(TabDragPolicy.REORDER);
-        TabDragPolicy tabDragPolicy = tabPaneEditor.getTabDragPolicy();
-        
+
+        this.tabPaneEditor.setTabDragPolicy(TabDragPolicy.REORDER);
+        TabDragPolicy tabDragPolicy = this.tabPaneEditor.getTabDragPolicy();
+
         LOGGER.debug("### Initialize JfxFileContentEditorController."
-                + " borderPaneEditor=\"" + borderPaneEditor + "\""
-                + " jfxEditorMenu=\"" + jfxEditorMenu + "\""
-                + " tabPaneEditor=\"" + tabPaneEditor + "\""
+                + " borderPaneEditor=\"" + this.borderPaneEditor + "\""
+                + " jfxEditorMenu=\"" + this.jfxEditorMenu + "\""
+                + " tabPaneEditor=\"" + this.tabPaneEditor + "\""
                 + " tabDragPolicy=\"" + tabDragPolicy + "\""
-                + " jfxEditorBottom=\"" + jfxEditorBottom + "\""
-                + " jfxEditorMenuController=\"" + jfxEditorMenuController + "\""
-                + " jfxEditorBottomController=\"" + jfxEditorBottomController + "\""
+                + " jfxEditorBottom=\"" + this.jfxEditorBottom + "\""
+                + " jfxEditorMenuController=\"" + this.jfxEditorMenuController + "\""
+                + " jfxEditorBottomController=\"" + this.jfxEditorBottomController + "\""
         );
         this.jfxEditorMenuController.setParentController(this);
         this.jfxEditorBottomController.setParentController(this);

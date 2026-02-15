@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024, Oleksandr Yarmolenko. All rights reserved.
+ * Copyright (c) 2024, 2025, 2026 Oleksandr Yarmolenko. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -115,7 +115,7 @@ public class JfxFileContentEditorMenuController {
 
     // -------------------------------------------------------------------------------------
     @FXML
-    private ListView menuListViewFontFamily;
+    private ListView<String> menuListViewFontFamily;
 
     // -------------------------------------------------------------------------------------
     @FXML
@@ -135,11 +135,11 @@ public class JfxFileContentEditorMenuController {
 
     // -------------------------------------------------------------------------------------
     @FXML
-    private ListView menuListViewCharsetRead;
+    private ListView<String> menuListViewCharsetRead;
 
     // -------------------------------------------------------------------------------------
     @FXML
-    private ListView menuListViewCharsetWrite;
+    private ListView<String> menuListViewCharsetWrite;
 
     // -------------------------------------------------------------------------------------
     @FXML
@@ -236,8 +236,53 @@ public class JfxFileContentEditorMenuController {
                     return;
                 }
                 String strTabToId = tabTo.getId();
-                FileContentEditor fileEditor = (FileContentEditor) tabTo.getContent();
 
+                // -------------------------------------------------------------------------------------
+                if (tabFrom != null) {
+                    FileContentEditor fileEditorFrom = (FileContentEditor) tabFrom.getContent();
+                    FileContentEditorState stateEditor = fileEditorFrom.getState();
+
+                    boolean booHboxBottomSearchResultVisible = jfxEditorController.jfxEditorBottomController.hboxBottomSearchResult.visibleProperty().getValue();
+                    stateEditor.setSearchResultVisible(booHboxBottomSearchResultVisible);
+
+                    boolean booHboxBottomFindVisible = jfxEditorController.jfxEditorBottomController.hboxBottomFind.visibleProperty().getValue();
+                    stateEditor.setFindVisible(booHboxBottomFindVisible);
+
+                    boolean booHboxBottomReplaceVisible = jfxEditorController.jfxEditorBottomController.hboxBottomReplace.visibleProperty().getValue();
+                    stateEditor.setReplaceVisible(booHboxBottomReplaceVisible);
+
+                    String strSearchResult = jfxEditorController.jfxEditorBottomController.lblBottomSearchResult.getText();
+                    stateEditor.setSearchResult(strSearchResult);
+
+                    String strFind = jfxEditorController.jfxEditorBottomController.tfBottomFind.getText();
+                    stateEditor.setFind(strFind);
+
+                    String strReplace = jfxEditorController.jfxEditorBottomController.tfBottomReplace.getText();
+                    stateEditor.setFind(strReplace);
+                }
+
+                FileContentEditor fileEditor = (FileContentEditor) tabTo.getContent();
+                FileContentEditorState stateEditor = fileEditor.getState();
+
+                boolean booSearchResulrVisible = stateEditor.isSearchResultVisible();
+                jfxEditorController.jfxEditorBottomController.hboxBottomSearchResult.visibleProperty().set(booSearchResulrVisible);
+
+                boolean booFindVisible = stateEditor.isFindVisible();
+                jfxEditorController.jfxEditorBottomController.hboxBottomFind.visibleProperty().set(booFindVisible);
+
+                boolean booReplaceVisible = stateEditor.isReplaceVisible();
+                jfxEditorController.jfxEditorBottomController.hboxBottomReplace.visibleProperty().set(booReplaceVisible);
+
+                String strSearchResult = stateEditor.getSearchResult();
+                jfxEditorController.jfxEditorBottomController.lblBottomSearchResult.setText(strSearchResult);
+
+                String strFind = stateEditor.getFind();
+                jfxEditorController.jfxEditorBottomController.tfBottomFind.setText(strFind);
+
+                String strReplace = stateEditor.getReplace();
+                jfxEditorController.jfxEditorBottomController.tfBottomReplace.setText(strReplace);
+
+                // -------------------------------------------------------------------------------------
                 String strCharsetName = fileEditor.getCharsetName();
                 updateTextFieldLineCharsetName(strCharsetName);
 
@@ -260,11 +305,11 @@ public class JfxFileContentEditorMenuController {
             }
         });
 
-        EventHandler<EventFileRead> eventHandlerFileRead = new EventHandler() {
+        EventHandler<EventFileRead> eventHandlerFileRead = new EventHandler<EventFileRead>() {
             @Override
-            public void handle(Event event) {
+            public void handle(EventFileRead event) {
 
-                EventType eventType = event.getEventType();
+                EventType<?> eventType = event.getEventType();
                 Object eventSource = event.getSource();
                 EventTarget eventTarget = event.getTarget();
 
@@ -276,7 +321,7 @@ public class JfxFileContentEditorMenuController {
                             + " event=\"" + event + "\"");
                     return;
                 }
-                EventFileRead eventFileRead = (EventFileRead) event;
+                EventFileRead eventFileRead = event;
 
                 String strId = eventFileRead.getId();
                 String strLineEnding = eventFileRead.getLineEnding();
@@ -405,25 +450,35 @@ public class JfxFileContentEditorMenuController {
                     intLineCount++;
                     strLine = strLine.trim();
                     if (!strLine.isEmpty()) {
-                        boolean booFound = false;
-                        int intMenuItems = 0;
-                        for (MenuItem item : menuItemsFavorites) {
-                            intMenuItems++;
-                            if (intMenuItems <= INT_MENU_ITEMS_INIT) {
+                        if (strLine.startsWith("#")) {
+                            MenuItem menuItemNew = new MenuItem(strLine);
+                            menuItemsFavorites.add(menuItemNew);
+                            LOGGER.debug("Added Comment to Favorites Menu."
+                                    + " LineNumber=\"" + intLineCount + "\""
+                                    + " FileFavoritesPath=\"" + strLine + "\"");
+                            continue;
+                        } else {
+                            boolean booFound = false;
+                            int intMenuItems = 0;
+                            for (MenuItem item : menuItemsFavorites) {
+                                intMenuItems++;
+                                if (intMenuItems <= INT_MENU_ITEMS_INIT) {
+                                    continue;
+                                }
+                                String strMenuFilePath = item.getText();
+                                if (strLine.equalsIgnoreCase(strMenuFilePath)) {
+                                    LOGGER.debug("Favorites FilePath found in Menu"
+                                            + " LineNumber=" + intLineCount
+                                            + " FileFavoritesPath=\"" + strLine + "\"");
+                                    booFound = true;
+                                    break;
+                                }
+                            }
+                            if (booFound) {
                                 continue;
                             }
-                            String strMenuFilePath = item.getText();
-                            if (strLine.equalsIgnoreCase(strMenuFilePath)) {
-                                LOGGER.debug("Favorites FilePath found in Menu"
-                                        + " LineNumber=" + intLineCount
-                                        + " FileFavoritesPath=\"" + strLine + "\"");
-                                booFound = true;
-                                break;
-                            }
                         }
-                        if (booFound) {
-                            continue;
-                        }
+
                         final int intLineCountFinal = intLineCount;
                         final String strLineFinal = strLine;
                         MenuItem menuItemNew = new MenuItem(strLine);
@@ -477,9 +532,9 @@ public class JfxFileContentEditorMenuController {
     private void startTimeline() {
 
         int intAutosaveInterval = Settings.getAutosaveInterval();
-        EventHandler timelineEventHandler = new EventHandler() {
+        EventHandler<ActionEvent> timelineEventHandler = new EventHandler<ActionEvent>() {
             @Override
-            public void handle(Event e) {
+            public void handle(ActionEvent e) {
                 lngAutoSaveCount++;
                 long lngTimeCurrent = System.currentTimeMillis();
                 LOGGER.debug("Autosave files EventHandler."
@@ -960,7 +1015,7 @@ public class JfxFileContentEditorMenuController {
 
     // -------------------------------------------------------------------------------------
     @FXML
-    public void charsetSelectRead(MouseEvent event) {
+    void charsetSelectRead(MouseEvent event) {
 
         event.consume();
         Tab tab = this.tabPane.getSelectionModel().getSelectedItem();
@@ -969,7 +1024,7 @@ public class JfxFileContentEditorMenuController {
             return;
         }
         String strTabId = tab.getId();
-        String strCharset = (String) this.menuListViewCharsetRead.getSelectionModel().getSelectedItem();
+        String strCharset = this.menuListViewCharsetRead.getSelectionModel().getSelectedItem();
         LOGGER.debug("Changed Charset."
                 + " strTabId=\"" + strTabId + "\""
                 + " strCharset=\"" + strCharset + "\"");
@@ -990,7 +1045,7 @@ public class JfxFileContentEditorMenuController {
 
     // -------------------------------------------------------------------------------------
     @FXML
-    public void charsetSelectWrite(MouseEvent event) {
+    void charsetSelectWrite(MouseEvent event) {
 
         event.consume();
         Tab tab = this.tabPane.getSelectionModel().getSelectedItem();
@@ -999,7 +1054,7 @@ public class JfxFileContentEditorMenuController {
             return;
         }
         String strTabId = tab.getId();
-        String strCharset = (String) this.menuListViewCharsetWrite.getSelectionModel().getSelectedItem();
+        String strCharset = this.menuListViewCharsetWrite.getSelectionModel().getSelectedItem();
         FileContentEditor fileEditor = (FileContentEditor) tab.getContent();
         fileEditor.setCharsetName(strCharset);
         this.updateTextFieldLineCharsetName(strCharset);
@@ -1010,10 +1065,10 @@ public class JfxFileContentEditorMenuController {
 
     // -------------------------------------------------------------------------------------
     @FXML
-    public void fontFamilySelect(MouseEvent event) {
+    void fontFamilySelect(MouseEvent event) {
 
         event.consume();
-        String strFontFamily = (String) this.menuListViewFontFamily.getSelectionModel().getSelectedItem();
+        String strFontFamily = this.menuListViewFontFamily.getSelectionModel().getSelectedItem();
         Tab tab = this.tabPane.getSelectionModel().getSelectedItem();
         if (tab == null) {
             LOGGER.error("Select Font Family before any tab created.");
@@ -1329,7 +1384,7 @@ public class JfxFileContentEditorMenuController {
     // -------------------------------------------------------------------------------------
     // Methods
     // -------------------------------------------------------------------------------------
-    public Timeline getTimeline() {
+    Timeline getTimeline() {
         return this.timeline;
     }
 
@@ -1340,14 +1395,13 @@ public class JfxFileContentEditorMenuController {
 
         Object objActionEventSource = actionEvent.getSource();
         String strItemId;
-        if (objActionEventSource instanceof javafx.scene.control.Button) {
-            Button btn = (Button) objActionEventSource;
-            strItemId = btn.getId();
-        } else if (objActionEventSource instanceof javafx.scene.control.MenuItem) {
-            MenuItem menuitemSource = (MenuItem) objActionEventSource;
-            strItemId = menuitemSource.getId();
-        } else {
-            strItemId = null;
+        switch (objActionEventSource) {
+            case javafx.scene.control.Button btn ->
+                strItemId = btn.getId();
+            case javafx.scene.control.MenuItem menuitemSource ->
+                strItemId = menuitemSource.getId();
+            default ->
+                strItemId = null;
         }
 
         LOGGER.debug(strAction
@@ -1388,7 +1442,7 @@ public class JfxFileContentEditorMenuController {
             public void handle(Event event) {
 
                 // Don't do that here:event.consume();
-                EventType eventType = event.getEventType();
+                EventType<?> eventType = event.getEventType();
                 LOGGER.debug("Closing Tab."
                         + " TabId=\"" + strTabId + "\""
                         + " TabsOpenedTotal=" + Settings.INT_TABS_OPENED_TOTAL_COUNT
@@ -1437,6 +1491,9 @@ public class JfxFileContentEditorMenuController {
                 fileEditor.saveFile(null);
             }
         });
+
+        TextField tfCaretPos = jfxEditorController.jfxEditorBottomController.tfBottomCursorPos;
+        fileEditor.setCaretPos(tfCaretPos);
 
         LOGGER.info("Created Tab."
                 + " TabId=\"" + strTabId + "\""

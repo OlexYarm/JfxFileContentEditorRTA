@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024, Oleksandr Yarmolenko. All rights reserved.
+ * Copyright (c) 2024, 2025, 2026 Oleksandr Yarmolenko. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -33,6 +33,7 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
 import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.DialogPane;
@@ -40,7 +41,7 @@ import javafx.scene.control.Tab;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class Utils {
+class Utils {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Utils.class);
 
@@ -135,7 +136,6 @@ public class Utils {
         try (BufferedWriter writer = Files.newBufferedWriter(path, charset, options)) {
             if (lstTabs == null || lstTabs.isEmpty()) {
                 writer.write("");
-                writer.close();
                 return false;
             }
             for (Tab tab : lstTabs) {
@@ -154,7 +154,6 @@ public class Utils {
                         + " strFilePath=\"" + strFilePath + "\"");
 
             }
-            writer.close();
         } catch (IOException ex) {
             LOGGER.error("Could not save Opened Tabs to file."
                     + " path=\"" + path + "\""
@@ -195,11 +194,13 @@ public class Utils {
     public static boolean createNewFile(Path pathFile) {
 
         switch (createFile(pathFile)) {
-            case 0:
+            case 0 -> {
                 return false;
-            case 1:
+            }
+            case 1 -> {
                 return true;
-            case -1:
+            }
+            case -1 -> {
                 // Could be no Parent Directory.
                 if (createParentDirectories(pathFile)) {
                     if (createFile(pathFile) == 1) {
@@ -207,8 +208,10 @@ public class Utils {
                     }
                 }
                 return false;
-            default:
+            }
+            default -> {
                 return false;
+            }
         }
     }
 
@@ -630,7 +633,7 @@ public class Utils {
     }
 
     // -------------------------------------------------------------------------------------
-    public static <T extends Node> T lookupNodeByID(Node nodeParent, Class clazzNode, String strNodeID) {
+    public static <T extends Node> T lookupNodeByID(Node nodeParent, Class<T> clazzNode, String strNodeID) {
 
         Node nodeFound = nodeParent.lookup("#" + strNodeID);
         if (nodeFound == null) {
@@ -639,7 +642,7 @@ public class Utils {
                     + " ClassNode=\"" + clazzNode + "\"");
         } else {
             String strNodeIdFound = nodeFound.getId();
-            Class clazzNodeFound = nodeFound.getClass();
+            Class<?> clazzNodeFound = nodeFound.getClass();
             String strClazzNodeFoundName = clazzNodeFound.getName();
 
             String strClazzNodeName = clazzNode.getName();
@@ -650,11 +653,13 @@ public class Utils {
                     + " NodeIdFound=\"" + strNodeIdFound + "\""
                     + " NodeFound=\"" + nodeFound + "\""
                     + " ClassNodeFound=\"" + clazzNodeFound + "\"");
+
             if (strNodeIdFound != null && !strNodeIdFound.isEmpty()) {
                 if (strNodeIdFound.equalsIgnoreCase(strNodeID)
                         && strClazzNodeFoundName.equalsIgnoreCase(strClazzNodeName)
                         && clazzNodeFound.equals(clazzNode)) {
-                    return (T) nodeFound;
+                    T t = clazzNode.cast(nodeFound);
+                    return t;
                 }
             }
         }
@@ -668,7 +673,7 @@ public class Utils {
     }
 
     // -------------------------------------------------------------------------------------
-    public static <T extends Node> boolean changeNodeVisibility2(Node nodeParent, Class clazzNode, String strNodeID, boolean booEnable) {
+    public static <T extends Node> boolean changeNodeVisibility2(Node nodeParent, Class<T> clazzNode, String strNodeID, boolean booEnable) {
 
         T node = lookupNodeByID(nodeParent, clazzNode, strNodeID);
         if (node == null) {
@@ -676,7 +681,7 @@ public class Utils {
                     + " NodeID=\"" + strNodeID + "\"");
         } else {
             String strNodeIdFound = node.getId();
-            Class clazzNodeFind = node.getClass();
+            Class<?> clazzNodeFind = node.getClass();
             LOGGER.debug("Change Node Visibility."
                     + " NodeID=\"" + strNodeID + "\""
                     + " ClassNode=\"" + clazzNode + "\""
