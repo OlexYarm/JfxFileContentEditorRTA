@@ -35,7 +35,7 @@ import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-class JfxSettingsController implements Initializable {
+public class JfxSettingsController implements Initializable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(JfxSettingsController.class);
 

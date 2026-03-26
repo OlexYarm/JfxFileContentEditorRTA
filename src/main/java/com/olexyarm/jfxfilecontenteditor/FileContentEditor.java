@@ -145,8 +145,7 @@ class FileContentEditor extends VBox {
     // -------------------------------------------------------------------------------------
     public FileContentEditor(final String strId, final Path pathFile) {
 
-        // TODO: Add CSS
-        //getStyleClass().add("fileContentEditor.css");
+        getStyleClass().add("fileContentEditor.css");
         this.strId = strId;
         this.pathFile = pathFile;
         this.parseFilePath(strId, pathFile);
