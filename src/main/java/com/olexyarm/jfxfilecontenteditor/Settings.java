@@ -43,6 +43,7 @@ import org.slf4j.LoggerFactory;
 import java.awt.Dimension;
 import java.util.Arrays;
 import javafx.scene.image.Image;
+import jfx.incubator.scene.control.richtext.model.StyleAttributeMap;
 
 class Settings {
 
@@ -727,6 +728,21 @@ class Settings {
         FONT_CURRENT = new Font(STR_FONT_FAMILY_CURRENT, DOUBLE_FONT_SIZE_CURRENT);
         save();
         return dblFontSize;
+    }
+
+    // -------------------------------------------------------------------------------------
+    public static String getFontDefaultCSS() {
+
+        return "-fx-font-family: '" + FONT_CURRENT.getFamily() + "';"
+                + " -fx-font-size: " + Settings.DOUBLE_FONT_SIZE_CURRENT + "px;";
+    }
+
+    // -------------------------------------------------------------------------------------
+    public static StyleAttributeMap getMapStyleAttrFontDefault() {
+
+        return StyleAttributeMap.builder()
+                .setFontFamily(FONT_CURRENT.getFamily())
+                .setFontSize(Settings.DOUBLE_FONT_SIZE_CURRENT).build();
     }
 
     // -------------------------------------------------------------------------------------

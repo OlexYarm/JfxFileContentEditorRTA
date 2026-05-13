@@ -134,7 +134,7 @@ class FileContentEditor extends VBox {
     private TabPane tabPane;
 
     private final TreeSet<TextPos> lstTextPosFound = new TreeSet<>();
-    private String strTextFindLatest;
+
     private boolean booCaseSensitiveLatest;
     private boolean booFoundAllDone;
     private final static String STR_NOT_FOUND = "Could not find any occurrence.";
@@ -159,9 +159,9 @@ class FileContentEditor extends VBox {
         LineNumberDecorator ld = new LineNumberDecorator();
         this.richTextArea.setLeftDecorator(ld);
 
-        this.mapStyleAttrFont = StyleAttributeMap.builder()
-                .setFontFamily(Settings.getFontFamilyDefault())
-                .setFontSize(Settings.getFontSizeDefault()).build();
+        this.mapStyleAttrFont = Settings.getMapStyleAttrFontDefault();
+
+        this.richTextArea.setStyle(Settings.getFontDefaultCSS());
 
         this.richTextArea.setDisplayCaret(true);
         this.richTextArea.setEditable(true);
@@ -272,7 +272,6 @@ class FileContentEditor extends VBox {
         // ---------- registerListeners - end ------------------------------------------------
         // ---------- init vars - begin ------------------------------------------------------
         this.booFoundAllDone = false;
-        this.strTextFindLatest = null;
         this.booCaseSensitiveLatest = false;
         //this.slstFounds = new SortedList<>(olstTextPosFounds, Comparator.naturalOrder());
         // ---------- init vars - end --------------------------------------------------------
@@ -916,13 +915,14 @@ class FileContentEditor extends VBox {
             return strMsg;
         }
 
-        if (this.strTextFindLatest == null
+        String strTextFindLatest = this.stateEditor.getFind();
+        if (strTextFindLatest == null
                 || booCaseSensitive != this.booCaseSensitiveLatest
-                || !strTextFind.equals(this.strTextFindLatest)) {
+                || !strTextFind.equals(strTextFindLatest)) {
             this.booFoundAllDone = false;
             this.selectionClear();
             this.lstTextPosFound.clear();
-            this.strTextFindLatest = strTextFind;
+            this.stateEditor.setFind(strTextFind);
         } else {
             if (booAll) {
                 if (this.booFoundAllDone) {
@@ -931,6 +931,7 @@ class FileContentEditor extends VBox {
                 }
             }
         }
+        this.stateEditor.setFind(strTextFind);
         if (!booCaseSensitive) {
             strTextFind = strTextFind.toLowerCase();
         }
@@ -1180,12 +1181,13 @@ class FileContentEditor extends VBox {
             LOGGER.error(strMsg + " pathFile=\"" + pathFile + "\"");
             return strMsg;
         }
-        if (strTextFind.equals(this.strTextFindLatest)) {
+        String strTextFindLatest = this.stateEditor.getFind();
+        if (strTextFind.equals(strTextFindLatest)) {
         } else {
             this.booFoundAllDone = false;
             this.selectionClear();
             this.lstTextPosFound.clear();
-            this.strTextFindLatest = strTextFind;
+            this.stateEditor.setFind(strTextFind);
         }
         String strResult = this.find(strTextFind, strTextReplace, false, true, booCaseSensitive);
         return strResult;

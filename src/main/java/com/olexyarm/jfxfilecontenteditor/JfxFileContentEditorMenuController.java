@@ -32,6 +32,7 @@ import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.Event;
@@ -74,7 +75,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class JfxFileContentEditorMenuController {
-
+    
     private static final Logger LOGGER = LoggerFactory.getLogger(JfxFileContentEditorMenuController.class);
 
     // -------------------------------------------------------------------------------------
@@ -88,16 +89,16 @@ public class JfxFileContentEditorMenuController {
     // -------------------------------------------------------------------------------------
     @FXML
     private Menu menuFile;
-
+    
     @FXML
     private MenuItem miSaveFile;
-
+    
     @FXML
     private MenuItem miSaveFileAs;
-
+    
     @FXML
     private MenuItem miSaveFilesAll;
-
+    
     @FXML
     private MenuItem miPrint;
 
@@ -192,14 +193,14 @@ public class JfxFileContentEditorMenuController {
     // -------------------------------------------------------------------------------------
     private TabPane tabPane;
     private ObservableList<Tab> lstTabs;
-
+    
     private long lngAutoSaveCount = 0;
     private Timeline timeline;
-
+    
     private boolean booTextWrap;
-
+    
     private static int INT_MENU_ITEMS_INIT = -1;
-
+    
     private ChangeListener<String> changeListenerFind;
     private final Clipboard clipboard = Clipboard.getSystemClipboard();
 
@@ -207,7 +208,7 @@ public class JfxFileContentEditorMenuController {
     // JFX constructor
     // -------------------------------------------------------------------------------------
     public void initialize() {
-
+        
         LOGGER.debug("### Initialize JfxFileContentEditorMenuController."
                 + " this=\"" + this + "\""
                 + " hboxMenu=\"" + hboxMenu + "\""
@@ -218,18 +219,18 @@ public class JfxFileContentEditorMenuController {
     // Methods
     // -------------------------------------------------------------------------------------
     public void setParentController(JfxFileContentEditorController jfxEditorController) {
-
+        
         this.jfxEditorController = jfxEditorController;
         this.borderPaneEditor = this.jfxEditorController.borderPaneEditor;
-
+        
         this.tabPane = this.jfxEditorController.tabPaneEditor;
         this.lstTabs = this.tabPane.getTabs();
-
+        
         this.tabPane.getSelectionModel().selectedItemProperty().addListener(
                 new ChangeListener<Tab>() {
             @Override
             public void changed(ObservableValue<? extends Tab> observable, Tab tabFrom, Tab tabTo) {
-
+                
                 if (tabTo == null) {
                     LOGGER.error("TabPane ChangeListener tabTo is null."
                             + " this=\"" + this + "\"");
@@ -241,57 +242,57 @@ public class JfxFileContentEditorMenuController {
                 if (tabFrom != null) {
                     FileContentEditor fileEditorFrom = (FileContentEditor) tabFrom.getContent();
                     FileContentEditorState stateEditor = fileEditorFrom.getState();
-
+                    
                     boolean booHboxBottomSearchResultVisible = jfxEditorController.jfxEditorBottomController.hboxBottomSearchResult.visibleProperty().getValue();
                     stateEditor.setSearchResultVisible(booHboxBottomSearchResultVisible);
-
+                    
                     boolean booHboxBottomFindVisible = jfxEditorController.jfxEditorBottomController.hboxBottomFind.visibleProperty().getValue();
                     stateEditor.setFindVisible(booHboxBottomFindVisible);
-
+                    
                     boolean booHboxBottomReplaceVisible = jfxEditorController.jfxEditorBottomController.hboxBottomReplace.visibleProperty().getValue();
                     stateEditor.setReplaceVisible(booHboxBottomReplaceVisible);
-
+                    
                     String strSearchResult = jfxEditorController.jfxEditorBottomController.lblBottomSearchResult.getText();
                     stateEditor.setSearchResult(strSearchResult);
-
+                    
                     String strFind = jfxEditorController.jfxEditorBottomController.tfBottomFind.getText();
                     stateEditor.setFind(strFind);
-
+                    
                     String strReplace = jfxEditorController.jfxEditorBottomController.tfBottomReplace.getText();
-                    stateEditor.setFind(strReplace);
+                    stateEditor.setReplace(strReplace);
                 }
-
+                
                 FileContentEditor fileEditor = (FileContentEditor) tabTo.getContent();
                 FileContentEditorState stateEditor = fileEditor.getState();
-
+                
                 boolean booSearchResulrVisible = stateEditor.isSearchResultVisible();
                 jfxEditorController.jfxEditorBottomController.hboxBottomSearchResult.visibleProperty().set(booSearchResulrVisible);
-
+                
                 boolean booFindVisible = stateEditor.isFindVisible();
                 jfxEditorController.jfxEditorBottomController.hboxBottomFind.visibleProperty().set(booFindVisible);
-
+                
                 boolean booReplaceVisible = stateEditor.isReplaceVisible();
                 jfxEditorController.jfxEditorBottomController.hboxBottomReplace.visibleProperty().set(booReplaceVisible);
-
+                
                 String strSearchResult = stateEditor.getSearchResult();
                 jfxEditorController.jfxEditorBottomController.lblBottomSearchResult.setText(strSearchResult);
-
+                
                 String strFind = stateEditor.getFind();
                 jfxEditorController.jfxEditorBottomController.tfBottomFind.setText(strFind);
-
+                
                 String strReplace = stateEditor.getReplace();
                 jfxEditorController.jfxEditorBottomController.tfBottomReplace.setText(strReplace);
 
                 // -------------------------------------------------------------------------------------
                 String strCharsetName = fileEditor.getCharsetName();
                 updateTextFieldLineCharsetName(strCharsetName);
-
+                
                 String strLineEnding = fileEditor.getLineEnding();
                 updateTextFieldLineEnding(strLineEnding);
-
+                
                 boolean booTextWrap = fileEditor.isTextWrap();
                 cbTextWrap.setSelected(booTextWrap);
-
+                
                 LOGGER.trace("TabPane ChangeListener."
                         + " this=\"" + this + "\""
                         //+ " strTabFromId=\"" + strTabFromId + "\""
@@ -304,15 +305,15 @@ public class JfxFileContentEditorMenuController {
                         + " tabTo=\"" + tabTo + "\"");
             }
         });
-
+        
         EventHandler<EventFileRead> eventHandlerFileRead = new EventHandler<EventFileRead>() {
             @Override
             public void handle(EventFileRead event) {
-
+                
                 EventType<?> eventType = event.getEventType();
                 Object eventSource = event.getSource();
                 EventTarget eventTarget = event.getTarget();
-
+                
                 if (!(event instanceof EventFileRead)) {
                     LOGGER.debug("eventHandlerFileRead unknown event."
                             + " eventType=\"" + eventType + "\""
@@ -322,11 +323,11 @@ public class JfxFileContentEditorMenuController {
                     return;
                 }
                 EventFileRead eventFileRead = event;
-
+                
                 String strId = eventFileRead.getId();
                 String strLineEnding = eventFileRead.getLineEnding();
                 String strCharsetName = eventFileRead.getCharsetName();
-
+                
                 LOGGER.debug("eventHandlerFileRead."
                         + " strId=\"" + strId + "\""
                         + " strLineEnding=\"" + strLineEnding + "\""
@@ -342,16 +343,16 @@ public class JfxFileContentEditorMenuController {
                     updateTextFieldLineCharsetName(strCharsetName);
                     updateTextFieldLineEnding(strLineEnding);
                 }
-
+                
                 event.consume();
             }
         };
         this.tabPane.addEventHandler(EventFileRead._FILE_READ, eventHandlerFileRead);
-
+        
         this.cbTextWrap.selectedProperty().addListener(new ChangeListener<Boolean>() {
             @Override
             public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
-
+                
                 Tab tab = tabPane.getSelectionModel().getSelectedItem();
                 if (tab == null) {
                     LOGGER.error("Change TextWrap before any tab created.");
@@ -359,7 +360,7 @@ public class JfxFileContentEditorMenuController {
                 }
                 FileContentEditor fileEditor = (FileContentEditor) tab.getContent();
                 fileEditor.setTextWrap(newValue);
-
+                
                 LOGGER.trace("cbTextWrap ChangeListener."
                         + " this=\"" + this + "\""
                         + " observable=\"" + observable + "\""
@@ -368,9 +369,9 @@ public class JfxFileContentEditorMenuController {
                 );
             }
         });
-
+        
         VBox jfxEditorBottom = this.jfxEditorController.jfxEditorBottom;
-
+        
         LOGGER.debug("### Setting Parent Controller in JfxFileContentEditorMenuController."
                 + " this=\"" + this + "\""
                 + " jfxEditorController=\"" + jfxEditorController + "\""
@@ -381,7 +382,7 @@ public class JfxFileContentEditorMenuController {
                 + " lstTabs=\"" + this.lstTabs + "\""
                 + " jfxEditorBottom=\"" + jfxEditorBottom + "\""
         );
-
+        
         if (Settings.getLogLevel() == null) {
             Settings.load();
         }
@@ -407,14 +408,14 @@ public class JfxFileContentEditorMenuController {
 
     // -------------------------------------------------------------------------------------
     private void addMenuFontFamily() {
-
+        
         ObservableList<String> menuItemsFontFamily = this.menuListViewFontFamily.getItems();
         menuItemsFontFamily.addAll(Settings.OBS_LST_VIEW_FONT_FAMILIES);
     }
 
     // -------------------------------------------------------------------------------------
     private void addMenuCharset() {
-
+        
         ObservableList<String> menuItemsCharsetsRead = this.menuListViewCharsetRead.getItems();
         menuItemsCharsetsRead.addAll(Settings.getObsLstFontCharsets());
         ObservableList<String> menuItemsCharsetsWrite = this.menuListViewCharsetWrite.getItems();
@@ -423,23 +424,23 @@ public class JfxFileContentEditorMenuController {
 
     // -------------------------------------------------------------------------------------
     private void addFavorites() {
-
+        
         ObservableList<MenuItem> menuItemsFavorites = this.menuFavorites.getItems();
         if (menuItemsFavorites == null) {
             // Should never happend.
             LOGGER.error("Menu Favorites is empty.");
             return;
         }
-
+        
         if (INT_MENU_ITEMS_INIT < 0) {
             INT_MENU_ITEMS_INIT = menuItemsFavorites.size();
         }
         int intMenuItemsCount = menuItemsFavorites.size();
         menuItemsFavorites.remove(INT_MENU_ITEMS_INIT, intMenuItemsCount);
-
+        
         String strFileFavoritesPath = Settings.caclulateFavoritesPath();
         Path pathFileFavorites = FileSystems.getDefault().getPath(strFileFavoritesPath);
-
+        
         String strErrMsg = Utils.checkFileExist("addFavorites", pathFileFavorites);
         if (strErrMsg == null || strErrMsg.isBlank()) {
             Charset charset = Charset.forName(Settings.STR_CHARSET_CURRENT);
@@ -478,7 +479,7 @@ public class JfxFileContentEditorMenuController {
                                 continue;
                             }
                         }
-
+                        
                         final int intLineCountFinal = intLineCount;
                         final String strLineFinal = strLine;
                         MenuItem menuItemNew = new MenuItem(strLine);
@@ -515,7 +516,7 @@ public class JfxFileContentEditorMenuController {
 
     // -------------------------------------------------------------------------------------
     private void restoreOpenedTabs() {
-
+        
         List<String> lstOpenedFiles = Utils.openTabsRestore(lstTabs);
         for (String strFilePath : lstOpenedFiles) {
             Path pathFile = Path.of(strFilePath);
@@ -530,7 +531,7 @@ public class JfxFileContentEditorMenuController {
 
     // -------------------------------------------------------------------------------------
     private void startTimeline() {
-
+        
         int intAutosaveInterval = Settings.getAutosaveInterval();
         EventHandler<ActionEvent> timelineEventHandler = new EventHandler<ActionEvent>() {
             @Override
@@ -565,17 +566,17 @@ public class JfxFileContentEditorMenuController {
 
     // -------------------------------------------------------------------------------------
     private boolean openFileinTab(Path pathFile) {
-
+        
         if (!Utils.checkNewTabsAllowed(this.lstTabs)) {
             return false;
         }
-
+        
         String strErrMsg = Utils.checkFileExist("openFileinTab", pathFile);
         if (strErrMsg != null && !strErrMsg.isBlank()) {
             Utils.showMessage(AlertType.ERROR, "Opening File", "", "File does not exist:\n" + pathFile, null, null);
             return false;
         }
-
+        
         LOGGER.debug("Opening File in Tab."
                 + " FILES_OPEN_COUNT=" + Settings.INT_FILES_OPENED_TOTAL_COUNT
                 + " pathFile=\"" + pathFile + "\"");
@@ -583,10 +584,10 @@ public class JfxFileContentEditorMenuController {
         if (tab == null) {
             return false;
         }
-
+        
         FileContentEditor fileEditor = (FileContentEditor) tab.getContent();
         fileEditor.setTabPane(this.tabPane);
-
+        
         strErrMsg = fileEditor.openFile();
         if (strErrMsg != null && !strErrMsg.isBlank()) {
             Utils.showMessage(AlertType.ERROR, "Opening File \"" + pathFile, "\"", strErrMsg, null, null);
@@ -594,20 +595,20 @@ public class JfxFileContentEditorMenuController {
         }
         this.booTextWrap = Settings.BOO_TEXT_WRAP_DEFAULT;
         fileEditor.setTextWrap(this.booTextWrap);
-
+        
         this.lstTabs.add(tab);
         this.tabPane.getSelectionModel().select(tab);
-
+        
         this.changeMenuVisibility(true);
-
+        
         Settings.INT_FILES_OPENED_TOTAL_COUNT++;
         String strFileDir = fileEditor.getFileDir();
         Settings.setLastOpenedDir(strFileDir);
-
+        
         LOGGER.info("Opened File in Tab."
                 + " FILES_OPEN_COUNT=\"" + Settings.INT_FILES_OPENED_TOTAL_COUNT
                 + " pathFile=\"" + pathFile + "\"");
-
+        
         return true;
     }
 
@@ -616,37 +617,37 @@ public class JfxFileContentEditorMenuController {
     // -------------------------------------------------------------------------------------
     @FXML
     private void newFile(ActionEvent actionEvent) throws IOException {
-
+        
         actionEvent.consume();
-
+        
         if (!Utils.checkNewTabsAllowed(this.lstTabs)) {
             return;
         }
         if (LOGGER.isDebugEnabled()) {
             this.logActionEventId("New File", actionEvent);
         }
-
+        
         Tab tab = this.createNewTab(null);
         if (tab == null) {
             return;
         }
-
+        
         FileContentEditor fileEditor = (FileContentEditor) tab.getContent();
         fileEditor.newFile();
-
+        
         this.booTextWrap = Settings.BOO_TEXT_WRAP_DEFAULT;
         fileEditor.setTextWrap(this.booTextWrap);
-
+        
         this.lstTabs.add(tab);
         this.tabPane.getSelectionModel().select(tab);
-
+        
         this.changeMenuVisibility(true);
     }
 
     // -------------------------------------------------------------------------------------
     @FXML
     private void openFile(ActionEvent actionEvent) throws IOException {
-
+        
         actionEvent.consume();
         if (!Utils.checkNewTabsAllowed(this.lstTabs)) {
             return;
@@ -654,7 +655,7 @@ public class JfxFileContentEditorMenuController {
         if (LOGGER.isDebugEnabled()) {
             this.logActionEventId("Open File", actionEvent);
         }
-
+        
         FileChooser fileChooser = new FileChooser();
         fileChooser.setInitialDirectory(new File(Settings.getLastOpenedDir()));
         fileChooser.setTitle("Select a file to open");
@@ -671,14 +672,14 @@ public class JfxFileContentEditorMenuController {
             return;
         }
         Path pathFile = file.toPath();
-
+        
         this.openFileinTab(pathFile);
     }
 
     // -------------------------------------------------------------------------------------
     @FXML
     private void saveFile(ActionEvent actionEvent) throws IOException {
-
+        
         actionEvent.consume();
         Tab tab = this.tabPane.getSelectionModel().getSelectedItem();
         if (tab == null) {
@@ -691,7 +692,7 @@ public class JfxFileContentEditorMenuController {
     // -------------------------------------------------------------------------------------
     @FXML
     private void saveFileAs(ActionEvent actionEvent) throws IOException {
-
+        
         actionEvent.consume();
         Tab tab = this.tabPane.getSelectionModel().getSelectedItem();
         if (tab == null) {
@@ -699,24 +700,24 @@ public class JfxFileContentEditorMenuController {
             return;
         }
         String strTabId = tab.getId();
-
+        
         FileContentEditor fileEditor = (FileContentEditor) tab.getContent();
         String strFileName = fileEditor.getFileName();
         String strFilePath = fileEditor.getFilePath();
         String strFileNameExt = fileEditor.getFileExt();
         String strFileDir = fileEditor.getFileDir();
-
+        
         FileChooser fileChooser = new FileChooser();
         if (strFileNameExt != null && !strFileNameExt.isBlank()) {
             fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Files (*." + strFileNameExt + ")", "*." + strFileNameExt));
         }
-
+        
         if (strFileDir != null && !strFileDir.isBlank()) {
             fileChooser.setInitialDirectory(new File(strFileDir));
         } else {
             fileChooser.setInitialDirectory(new File(Settings.STR_DIRECTORY_USER_HOME_PATH));
         }
-
+        
         File fileSaveAs = null;
         Window window = null;
         try {
@@ -738,21 +739,21 @@ public class JfxFileContentEditorMenuController {
                     + " Throwable=\"" + t.toString() + "\"");
             return;
         }
-
+        
         if (fileSaveAs == null) {
             LOGGER.info("Saving file As canceled."
                     + " TabId=\"" + strTabId + "\""
                     + " FilePathOld=\"" + strFilePath + "\"");
             return;
         }
-
+        
         Path pathFileSaveAs = fileSaveAs.toPath();
         fileEditor.parseFilePath(strTabId, pathFileSaveAs);
         String strFileNameAs = fileEditor.getFileName();
         String strFilePathAs = fileEditor.getFilePath();
         String strFileNameExtAs = fileEditor.getFileExt();
         String strFileDirAs = fileEditor.getFileDir();
-
+        
         LOGGER.info("Saving file As."
                 + " TabId=\"" + strTabId + "\""
                 + " FilePathOld=\"" + strFilePath + "\""
@@ -776,7 +777,7 @@ public class JfxFileContentEditorMenuController {
     // -------------------------------------------------------------------------------------
     @FXML
     private void saveFilesAll(ActionEvent actionEvent) throws IOException {
-
+        
         actionEvent.consume();
         ObservableList<Tab> tabs = this.tabPane.getTabs();
         if (tabs == null || tabs.isEmpty()) {
@@ -791,21 +792,21 @@ public class JfxFileContentEditorMenuController {
     // -------------------------------------------------------------------------------------
     @FXML
     private void printFile(ActionEvent actionEvent) throws IOException {
-
+        
         actionEvent.consume();
         Tab tab = this.tabPane.getSelectionModel().getSelectedItem();
         if (tab == null) {
             return;
         }
         String strTabId = tab.getId();
-
+        
         FileContentEditor fileEditor = (FileContentEditor) tab.getContent();
         String strFileName = fileEditor.getFileName();
         String strFilePath = fileEditor.getFilePath();
 
 // TODO: move print to Custom Control, or find better way to print
         RichTextArea ta = fileEditor.getTextArea();
-
+        
         PrinterJob printerJob = PrinterJob.createPrinterJob();
         if (printerJob != null) {
             Window window = this.borderPaneEditor.getScene().getWindow();
@@ -828,7 +829,7 @@ public class JfxFileContentEditorMenuController {
                         + " FilePath=\"" + strFilePath + "\"");
                 return;
             }
-
+            
             boolean booPrinted = printerJob.printPage(ta);
             if (booPrinted) {
                 printerJob.endJob();
@@ -855,27 +856,41 @@ public class JfxFileContentEditorMenuController {
     // -------------------------------------------------------------------------------------
     @FXML
     private void find(ActionEvent actionEvent) throws IOException {
+        
+        this.populateFindReplaceFields(actionEvent, false);
+    }
 
+    // -------------------------------------------------------------------------------------
+    @FXML
+    private void replace(ActionEvent actionEvent) throws IOException {
+        
+        this.populateFindReplaceFields(actionEvent, true);
+    }
+
+    // -------------------------------------------------------------------------------------
+    private void populateFindReplaceFields(ActionEvent actionEvent, boolean booReplace) {
+        
         actionEvent.consume();
         if (lstTabs.isEmpty()) {
             // Should never happen, but ...
-            Utils.showMessage(AlertType.INFORMATION, "Find", "", "No one file open for editing.", null, null);
+            Utils.showMessage(AlertType.ERROR, "Find", "", "No one file open for editing.", null, null);
             return;
         }
-
+        Tab tab = this.tabPane.getSelectionModel().getSelectedItem();
+        if (tab == null) {
+            // Should never happen, but ...
+            Utils.showMessage(AlertType.ERROR, "Find", "", "Could not get Tab.", null, null);
+            return;
+        }
+        
         HBox node = (HBox) Utils.MAP_NODE_REFS.get(Utils.NODE_NAMES.hboxBottomSearchResult.toString());
         node.setVisible(true);
-
+        
         node = (HBox) Utils.MAP_NODE_REFS.get(Utils.NODE_NAMES.hboxBottomFind.toString());
         node.setVisible(true);
-
-        this.fillFindFieldFromClipboard();
-    }
-
-    private TextField fillFindFieldFromClipboard() {
-
+        
         TextField tfFind = (TextField) Utils.MAP_NODE_REFS.get(Utils.NODE_NAMES.tfBottomFind.toString());
-
+        
         if (changeListenerFind == null) {
             changeListenerFind = new ChangeListener<String>() {
                 @Override
@@ -887,49 +902,38 @@ public class JfxFileContentEditorMenuController {
             };
             tfFind.textProperty().addListener(changeListenerFind);
         }
-
-        String strTextToSearch = "";
-        if (clipboard.hasString()) {
-            strTextToSearch = clipboard.getString();
+        
+        FileContentEditor fileEditor = (FileContentEditor) tab.getContent();
+        FileContentEditorState stateEditor = fileEditor.getState();
+        
+        String strSearchResult = stateEditor.getSearchResult();
+        jfxEditorController.jfxEditorBottomController.lblBottomSearchResult.setText(strSearchResult);
+        
+        String strTextFindLatest = stateEditor.getFind();
+        if (strTextFindLatest == null) {
+            if (clipboard.hasString()) {
+                strTextFindLatest = clipboard.getString();
+            }
         }
         tfFind.requestFocus();
         tfFind.positionCaret(0);
-        tfFind.setText(strTextToSearch);
+        tfFind.setText(strTextFindLatest);
         tfFind.selectAll();
-        return tfFind;
-    }
 
-    // -------------------------------------------------------------------------------------
-    @FXML
-    private void replace(ActionEvent actionEvent) throws IOException {
-
-        actionEvent.consume();
-        if (lstTabs.isEmpty()) {
-            // Should never happen, but ...
-            Utils.showMessage(AlertType.INFORMATION, "Replace", "", "No one file open for editing.", null, null);
-            return;
+        if (booReplace) {
+            node = (HBox) Utils.MAP_NODE_REFS.get(Utils.NODE_NAMES.hboxBottomReplace.toString());
+            node.setVisible(true);
+            String strTextReplaceLatest = stateEditor.getReplace();
+            jfxEditorController.jfxEditorBottomController.tfBottomReplace.setText(strTextReplaceLatest);
+            jfxEditorController.jfxEditorBottomController.tfBottomReplace.requestFocus();
+            jfxEditorController.jfxEditorBottomController.tfBottomReplace.positionCaret(0);
         }
-
-        HBox node = (HBox) Utils.MAP_NODE_REFS.get(Utils.NODE_NAMES.hboxBottomSearchResult.toString());
-        node.setVisible(true);
-
-        node = (HBox) Utils.MAP_NODE_REFS.get(Utils.NODE_NAMES.hboxBottomFind.toString());
-        node.setVisible(true);
-
-        node = (HBox) Utils.MAP_NODE_REFS.get(Utils.NODE_NAMES.hboxBottomReplace.toString());
-        node.setVisible(true);
-
-        this.fillFindFieldFromClipboard();
-
-        TextField tfReplace = (TextField) Utils.MAP_NODE_REFS.get(Utils.NODE_NAMES.tfBottomReplace.toString());
-        tfReplace.requestFocus();
-        tfReplace.positionCaret(0);
     }
 
     // -------------------------------------------------------------------------------------
     @FXML
     private void lineEndingWin(ActionEvent actionEvent) throws IOException {
-
+        
         actionEvent.consume();
         Tab tab = tabPane.getSelectionModel().getSelectedItem();
         String strTabId = tab.getId();
@@ -958,7 +962,7 @@ public class JfxFileContentEditorMenuController {
     // -------------------------------------------------------------------------------------
     @FXML
     private void exit(ActionEvent actionEvent) throws IOException {
-
+        
         actionEvent.consume();
         boolean booReturn;
         boolean booFileModyfied = Utils.checkAnyoneFileModified(this.lstTabs);
@@ -977,12 +981,12 @@ public class JfxFileContentEditorMenuController {
     // -------------------------------------------------------------------------------------
     @FXML
     private void fontSelect(ActionEvent actionEvent) throws IOException {
-
+        
         actionEvent.consume();
-
+        
         String strFontFamily;
         double dblFontSize;
-
+        
         Object source = actionEvent.getSource();
         MenuItem menuItem = (MenuItem) source;
         String strMenuItemId = menuItem.getId();
@@ -996,14 +1000,14 @@ public class JfxFileContentEditorMenuController {
                 strFontFamily = Settings.getFontFamilyDefault();
                 dblFontSize = Settings.getFontSizeDefault();
         }
-
+        
         Tab tab = this.tabPane.getSelectionModel().getSelectedItem();
         if (tab == null) {
             LOGGER.error("Select Font before any tab created.");
             return;
         }
         String strTabId = tab.getId();
-
+        
         FileContentEditor fileEditor = (FileContentEditor) tab.getContent();
         Font font = new Font(strFontFamily, dblFontSize);
         fileEditor.setFont(font);
@@ -1016,7 +1020,7 @@ public class JfxFileContentEditorMenuController {
     // -------------------------------------------------------------------------------------
     @FXML
     void charsetSelectRead(MouseEvent event) {
-
+        
         event.consume();
         Tab tab = this.tabPane.getSelectionModel().getSelectedItem();
         if (tab == null) {
@@ -1028,7 +1032,7 @@ public class JfxFileContentEditorMenuController {
         LOGGER.debug("Changed Charset."
                 + " strTabId=\"" + strTabId + "\""
                 + " strCharset=\"" + strCharset + "\"");
-
+        
         FileContentEditor fileEditor = (FileContentEditor) tab.getContent();
         fileEditor.setCharsetName(strCharset);
         String strErrMsg = fileEditor.openFile();
@@ -1037,7 +1041,7 @@ public class JfxFileContentEditorMenuController {
             Utils.showMessage(AlertType.ERROR, "Opening File", "", strErrMsg, null, null);
             return;
         }
-
+        
         LOGGER.debug("Opened File with new charset."
                 + " strTabId=\"" + strTabId + "\""
                 + " strCharset=\"" + strCharset + "\"");
@@ -1046,7 +1050,7 @@ public class JfxFileContentEditorMenuController {
     // -------------------------------------------------------------------------------------
     @FXML
     void charsetSelectWrite(MouseEvent event) {
-
+        
         event.consume();
         Tab tab = this.tabPane.getSelectionModel().getSelectedItem();
         if (tab == null) {
@@ -1066,7 +1070,7 @@ public class JfxFileContentEditorMenuController {
     // -------------------------------------------------------------------------------------
     @FXML
     void fontFamilySelect(MouseEvent event) {
-
+        
         event.consume();
         String strFontFamily = this.menuListViewFontFamily.getSelectionModel().getSelectedItem();
         Tab tab = this.tabPane.getSelectionModel().getSelectedItem();
@@ -1137,7 +1141,7 @@ public class JfxFileContentEditorMenuController {
     // -------------------------------------------------------------------------------------
     @FXML
     private void favoritesEdit(ActionEvent actionEvent) throws IOException {
-
+        
         actionEvent.consume();
         if (!Utils.checkNewTabsAllowed(this.lstTabs)) {
             return;
@@ -1148,7 +1152,7 @@ public class JfxFileContentEditorMenuController {
         String strTabId = tab.getId();
         FileContentEditor fileEditor = (FileContentEditor) tab.getContent();
         String strFileFavoritesPath = fileEditor.getFilePath();
-
+        
         String strErrMsg = Utils.checkFileExist(strTabId, pathFileFavorites);
         if (strErrMsg == null || strErrMsg.isBlank()) {
             LOGGER.info("Opening Favorites File for Editing."
@@ -1169,36 +1173,36 @@ public class JfxFileContentEditorMenuController {
                         + " FileFavoritesPath=\"" + strFileFavoritesPath + "\"");
             }
         }
-
+        
         this.lstTabs.add(tab);
         this.tabPane.getSelectionModel().select(tab);
-
+        
         this.changeMenuVisibility(true);
     }
 
     // -------------------------------------------------------------------------------------
     @FXML
     private void favoritesAdd(ActionEvent actionEvent) throws IOException {
-
+        
         actionEvent.consume();
-
+        
         Tab tab = this.tabPane.getSelectionModel().getSelectedItem();
         if (tab == null) {
             LOGGER.error("Could not add File to Favorites before any tab created.");
             return;
         }
         String strTabId = tab.getId();
-
+        
         FileContentEditor fileEditor = (FileContentEditor) tab.getContent();
         boolean booFileModified = fileEditor.isFileModified();
         if (booFileModified) {
             fileEditor.saveFile(null);
         }
-
+        
         String strFileFavoritesPath = Settings.caclulateFavoritesPath();
         Path pathFileFavorites = FileSystems.getDefault().getPath(strFileFavoritesPath);
         String strFilePathToAdd = fileEditor.getFilePath();
-
+        
         String strErrMsg = Utils.checkFileExist(strTabId, pathFileFavorites);
         if (strErrMsg != null && !strErrMsg.isBlank()) {
             LOGGER.info("Create Favorites File."
@@ -1247,13 +1251,13 @@ public class JfxFileContentEditorMenuController {
             }
         }
         lstFavorites.add(strFilePathToAdd);
-
+        
         LOGGER.debug("Adding FilePath to Favorites File."
                 + " TabId=\"" + strTabId + "\""
                 + " FilePath=\"" + strFilePathToAdd + "\""
                 + " FileFavoritesPathCalc=\"" + strFileFavoritesPath + "\""
                 + " FileFavoritesPath=\"" + strFileFavoritesPath + "\"");
-
+        
         int intLineCount = 0;
         try (BufferedWriter bw = Files.newBufferedWriter(pathFileFavorites, charset,
                 StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING)) { //StandardOpenOption.APPEND
@@ -1280,15 +1284,15 @@ public class JfxFileContentEditorMenuController {
     // -------------------------------------------------------------------------------------
     @FXML
     private void settingsEdit(ActionEvent actionEvent) throws IOException {
-
+        
         actionEvent.consume();
-
+        
         Settings.load();
-
+        
         FXMLLoader fxmlLoader = Utils.loadFXML("jfxEditorSettings");
         Parent root = fxmlLoader.load();
         Scene scene = new Scene(root, Settings.INT_WINDOW_SETTINGS_WIDTH, Settings.INT_WINDOW_SETTINGS_HIGH);
-
+        
         scene.widthProperty().addListener(new ChangeListener<Number>() {
             @Override
             public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
@@ -1296,7 +1300,7 @@ public class JfxFileContentEditorMenuController {
                 Settings.INT_WINDOW_SETTINGS_WIDTH = intWindowWidth;
             }
         });
-
+        
         scene.heightProperty().addListener(
                 new ChangeListener<Number>() {
             @Override
@@ -1305,7 +1309,7 @@ public class JfxFileContentEditorMenuController {
                 Settings.INT_WINDOW_SETTINGS_HIGH = intWindowHigh;
             }
         });
-
+        
         Stage stage = new Stage();
         stage.setScene(scene);
         stage.setTitle("Settings");
@@ -1316,13 +1320,13 @@ public class JfxFileContentEditorMenuController {
     // -------------------------------------------------------------------------------------
     @FXML
     private void about(ActionEvent actionEvent) throws IOException {
-
+        
         actionEvent.consume();
-
+        
         FXMLLoader fxmlLoader = Utils.loadFXML("jfxEditorAbout");
         Parent root = fxmlLoader.load();
         Scene scene = new Scene(root, Settings.INT_WINDOW_ABOUT_WIDTH, Settings.INT_WINDOW_ABOUT_HIGH);
-
+        
         Stage stage = new Stage();
         stage.setScene(scene);
         stage.setTitle("About");
@@ -1333,15 +1337,15 @@ public class JfxFileContentEditorMenuController {
     // -------------------------------------------------------------------------------------
     @FXML
     private void fontIncrease(ActionEvent actionEvent) throws IOException {
-
+        
         actionEvent.consume();
-
+        
         Tab tab = this.tabPane.getSelectionModel().getSelectedItem();
         if (tab == null) {
             LOGGER.error("Font increase before any tab created.");
             return;
         }
-
+        
         String strTabId = tab.getId();
         FileContentEditor fileEditor = (FileContentEditor) tab.getContent();
         Font font = fileEditor.getFont();
@@ -1359,9 +1363,9 @@ public class JfxFileContentEditorMenuController {
     // -------------------------------------------------------------------------------------
     @FXML
     private void fontDecrease(ActionEvent actionEvent) throws IOException {
-
+        
         actionEvent.consume();
-
+        
         Tab tab = this.tabPane.getSelectionModel().getSelectedItem();
         if (tab == null) {
             LOGGER.error("Font Decrease before any tab created.");
@@ -1392,7 +1396,7 @@ public class JfxFileContentEditorMenuController {
     // Helpers 
     // -------------------------------------------------------------------------------------
     private void logActionEventId(String strAction, ActionEvent actionEvent) {
-
+        
         Object objActionEventSource = actionEvent.getSource();
         String strItemId;
         switch (objActionEventSource) {
@@ -1403,7 +1407,7 @@ public class JfxFileContentEditorMenuController {
             default ->
                 strItemId = null;
         }
-
+        
         LOGGER.debug(strAction
                 + " FILES_OPENED=" + Settings.INT_FILES_NEW_COUNT
                 + " FILES_OPENED_TOTAL=" + Settings.INT_FILES_OPENED_TOTAL_COUNT
@@ -1414,28 +1418,28 @@ public class JfxFileContentEditorMenuController {
 
     // -------------------------------------------------------------------------------------
     private Tab createNewTab(Path pathFile) {
-
+        
         Settings.INT_TABS_OPENED_TOTAL_COUNT++;
         Settings.INT_TABS_OPENED_COUNT++;
         String strTabId = "" + Settings.INT_TABS_OPENED_TOTAL_COUNT;
-
+        
         if (pathFile == null) {
             Settings.INT_FILES_NEW_COUNT++;
             pathFile = Paths.get(Settings.getLastOpenedDir(),
                     Settings.STR_NEW_FILENAME_DEFAULT + Settings.INT_FILES_NEW_COUNT + "." + Settings.STR_FILENAME_EXT_DEFAULT);
         }
-
+        
         FileContentEditor fileEditor = new FileContentEditor(strTabId, pathFile);
         String strFilePath = fileEditor.getFilePath();
         String strFileName = fileEditor.getFileName();
         String strFileNameExt = fileEditor.getFileExt();
-
+        
         Tab tab = new Tab(strFileName, fileEditor);
         tab.setId(strTabId);
-
+        
         Tooltip tltp = new Tooltip(strFilePath);
         tab.setTooltip(tltp);
-
+        
         tab.setClosable(true);
         tab.setOnCloseRequest(new EventHandler<Event>() {
             @Override
@@ -1456,16 +1460,16 @@ public class JfxFileContentEditorMenuController {
                 Settings.INT_TABS_CLOSED_COUNT++;
                 if (Settings.INT_TABS_OPENED_COUNT == 0) {
                     changeMenuVisibility(false);
-
+                    
                     HBox node = (HBox) Utils.MAP_NODE_REFS.get(Utils.NODE_NAMES.hboxBottomSearchResult.toString());
                     Utils.changeNodeVisibility(node, false);
-
+                    
                     node = (HBox) Utils.MAP_NODE_REFS.get(Utils.NODE_NAMES.hboxBottomFind.toString());
                     Utils.changeNodeVisibility(node, false);
-
+                    
                     node = (HBox) Utils.MAP_NODE_REFS.get(Utils.NODE_NAMES.hboxBottomReplace.toString());
                     Utils.changeNodeVisibility(node, false);
-
+                    
                 }
                 boolean booModified = fileEditor.isFileModified();
                 if (!booModified) {
@@ -1491,10 +1495,10 @@ public class JfxFileContentEditorMenuController {
                 fileEditor.saveFile(null);
             }
         });
-
+        
         TextField tfCaretPos = jfxEditorController.jfxEditorBottomController.tfBottomCursorPos;
         fileEditor.setCaretPos(tfCaretPos);
-
+        
         LOGGER.info("Created Tab."
                 + " TabId=\"" + strTabId + "\""
                 + " FileName=\"" + strFileName + "\""
@@ -1505,12 +1509,12 @@ public class JfxFileContentEditorMenuController {
 
     // ---------------------------------------------------------------------------
     private void saveFileFromTab(Tab tab) {
-
+        
         if (tab == null) {
             LOGGER.error("Can't save File from Tab null.");
             return;
         }
-
+        
         FileContentEditor fileEditor = (FileContentEditor) tab.getContent();
         boolean booFileModified = fileEditor.isFileModified();
         if (!booFileModified) {
@@ -1526,18 +1530,18 @@ public class JfxFileContentEditorMenuController {
 
     // -------------------------------------------------------------------------------------
     private void changeMenuVisibility(boolean booVisible) {
-
+        
         this.miSaveFile.setVisible(booVisible);
         this.miSaveFileAs.setVisible(booVisible);
         this.miSaveFilesAll.setVisible(booVisible);
         this.menuEdit.setVisible(booVisible);
         this.menuFont.setVisible(booVisible);
         this.miPrint.setVisible(booVisible);
-
+        
         this.cbTextWrap.setDisable(!booVisible);
         this.buttonFontIncrease.setDisable(!booVisible);
         this.buttonFontDecrease.setDisable(!booVisible);
-
+        
         if (Settings.BOO_SHOW_TOOLBAR_EABLED) {
             this.buttonSaveFile.setVisible(booVisible);
             this.buttonSaveFileAs.setVisible(booVisible);
@@ -1548,7 +1552,7 @@ public class JfxFileContentEditorMenuController {
 
     // -------------------------------------------------------------------------------------
     private void updateTextFieldLineEnding(String strLineEnding) {
-
+        
         TextField tfLineEnding = (TextField) Utils.MAP_NODE_REFS.get(Utils.NODE_NAMES.tfBottomLineEnding.toString());
         tfLineEnding.setText(strLineEnding);
         // TODO: make set width better
@@ -1557,7 +1561,7 @@ public class JfxFileContentEditorMenuController {
 
     // -------------------------------------------------------------------------------------
     private void updateTextFieldLineCharsetName(String strCharsetName) {
-
+        
         TextField tfCharset = (TextField) Utils.MAP_NODE_REFS.get(Utils.NODE_NAMES.tfBottomCharset.toString());
         tfCharset.setText(strCharsetName);
         // TODO: make set width better
