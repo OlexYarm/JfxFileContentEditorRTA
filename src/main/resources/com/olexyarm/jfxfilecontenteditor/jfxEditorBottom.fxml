@@ -13,11 +13,7 @@
 
 <VBox fx:id="vboxBottom"
       xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
-      spacing="5" style="-fx-border-width: 1; -fx-border-style: solid; -fx-border-color:black;"
       fx:controller="com.olexyarm.jfxfilecontenteditor.JfxFileContentEditorBottomController">
-    <padding>
-        <Insets bottom="10" left="20" right="20" top="10" />
-    </padding>
     
     <HBox fx:id="hboxBottomSearchResult" visible="false">
         <Label fx:id="lblBottomSearchResult">Find/Replace result</Label>
@@ -36,24 +32,24 @@
     
     <HBox fx:id="hboxBottomFind" visible="false">
         <TextField fx:id="tfBottomFind" maxWidth="1000" prefWidth="300" promptText="Find What" />
-        <Button fx:id="btBottomNext" onAction="#findNext" text="Next" />
-        <Button fx:id="btBottomPrev" onAction="#findPrev" text="Prev" />
-        <Button fx:id="btBottomAll" onAction="#findAll" text="All" />
-        <Button fx:id="btBottomCase" onAction="#findCase" text="Case" />
+        <Button fx:id="btBottomNext" onAction="#findNext" text="Next"/>
+        <Button fx:id="btBottomPrev" onAction="#findPrev" text="Prev"/>
+        <Button fx:id="btBottomAll" onAction="#findAll" text="All"/>
+        <Button fx:id="btBottomCase" onAction="#findCase" text="Case"/>
     </HBox>
     
     <HBox fx:id="hboxBottomReplace" visible="false">
-        <TextField fx:id="tfBottomReplace" maxWidth="1000" prefWidth="300" promptText="Replace With" />
-        <Button fx:id="btBottomReplace" onAction="#replace" text="Replace" />
-        <Button fx:id="btBottomReplaceAll" onAction="#replaceAll" text="Replace All" />
+        <TextField fx:id="tfBottomReplace" maxWidth="1000" prefWidth="300" promptText="Replace With"/>
+        <Button fx:id="btBottomReplace" onAction="#replace" text="Replace"/>
+        <Button fx:id="btBottomReplaceAll" onAction="#replaceAll" text="Replace All"/>
     </HBox>
     
-    <HBox fx:id="hboxBottomVersion" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml">
+    <HBox fx:id="hboxBottomInfo" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml">
         <Label fx:id="hboxBottomLabelVersion" />
         <Region HBox.hgrow="ALWAYS" />
-        <TextField fx:id="tfBottomCursorPos" alignment="CENTER" disable="false" editable="false" />
-        <TextField fx:id="tfBottomLineEnding" alignment="CENTER" disable="false" editable="false" />
-        <TextField fx:id="tfBottomCharset" alignment="CENTER" disable="false" editable="false" />
+        <TextField fx:id="tfBottomCursorPos" alignment="CENTER" disable="false" editable="false"/>
+        <TextField fx:id="tfBottomLineEnding" alignment="CENTER" disable="false" editable="false"/>
+        <TextField fx:id="tfBottomCharset" alignment="CENTER" disable="false" editable="false"/>
     </HBox>
     
 </VBox>

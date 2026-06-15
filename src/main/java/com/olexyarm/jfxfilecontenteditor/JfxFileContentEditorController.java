@@ -39,7 +39,7 @@ public class JfxFileContentEditorController {
     BorderPane borderPaneEditor;
 
     @FXML
-    HBox jfxEditorMenu;
+    VBox jfxEditorMenu;
 
     @FXML
     TabPane tabPaneEditor;

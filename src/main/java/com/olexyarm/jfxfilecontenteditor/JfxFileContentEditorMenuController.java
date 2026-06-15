@@ -32,7 +32,6 @@ import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
-import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.Event;
@@ -84,7 +83,7 @@ public class JfxFileContentEditorMenuController {
 
     // -------------------------------------------------------------------------------------
     @FXML
-    private HBox hboxMenu;
+    private VBox vboxMenu;
 
     // -------------------------------------------------------------------------------------
     @FXML
@@ -211,7 +210,7 @@ public class JfxFileContentEditorMenuController {
         
         LOGGER.debug("### Initialize JfxFileContentEditorMenuController."
                 + " this=\"" + this + "\""
-                + " hboxMenu=\"" + hboxMenu + "\""
+                + " vboxMenu=\"" + vboxMenu + "\""
                 + " menuFavorites=\"" + menuFavorites + "\"");
     }
 
@@ -375,7 +374,7 @@ public class JfxFileContentEditorMenuController {
         LOGGER.debug("### Setting Parent Controller in JfxFileContentEditorMenuController."
                 + " this=\"" + this + "\""
                 + " jfxEditorController=\"" + jfxEditorController + "\""
-                + " hboxMenu=\"" + hboxMenu + "\""
+                + " vboxMenu=\"" + vboxMenu + "\""
                 + " menuFavorites=\"" + menuFavorites + "\""
                 + " borderPaneEditor=\"" + this.borderPaneEditor + "\""
                 + " tabPane=\"" + this.tabPane + "\""

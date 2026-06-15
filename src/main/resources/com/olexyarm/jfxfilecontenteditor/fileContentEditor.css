@@ -1,29 +1,116 @@
-.fileContentEditor {
+/* -fx-skin: "com.olexyarm.jfxfilecontenteditor.FileContentEditorSkin";*/
 
-    /* -fx-skin: "com.olexyarm.jfxfilecontenteditor.FileContentEditorSkin";*/
-
-    #tfBottomCursorPos{
-        -fx-font-size:11px;
-        /* -fx-background-color:rgba(0,0,0,0);*/
-        -fx-border-width:2;
-        -fx-border-style:hidden hidden hidden solid;
-        -fx-border-color:lightgrey;
-    }
-
-    #tfBottomLineEnding{
-        -fx-font-size:11px;
-        -fx-background-color:rgba(0,0,0,0);
-        -fx-border-width:2;
-        -fx-border-style:hidden solid hidden solid;
-        -fx-border-color:lightgrey;
-    }
-
-    #tfBottomCharset {
-        -fx-font-size:11px;
-        -fx-background-color:rgba(0,0,0,0);
-        -fx-border-width:2;
-        -fx-border-style:hidden solid hidden hidden;
-        -fx-border-color:lightgrey;
-    }
-
+.root {
+    -fx-background-color: rgba(255,255,255,1.0);
 }
+
+/* jfxFileContentEditor.fxml */
+#borderPaneEditor{
+    -fx-border-width: 1;
+    -fx-border-style: solid;
+    -fx-border-color:black;
+    -fx-padding: 0px;
+}
+
+#tabPaneEditor{
+    -fx-border-width: 1;
+    -fx-border-style: solid hidden solid hidden; /* Top, Right, Bottom, Left  */
+    -fx-border-color:black;
+    -fx-padding: 0px;
+}
+
+/* jfxEditorMenu.fxml */
+/*
+#vboxMenu{
+Width constraints
+-fx-pref-width: 200px;
+-fx-min-width: 150px;
+-fx-max-width: 300px;    
+}
+*/
+
+#hboxMenuBar{
+    -fx-spacing:5;
+}
+
+#mbMenuBar{
+    -fx-background-color:rgba(255,255,255,1.0);
+    -fx-pref-height: 15px;
+    -fx-min-height: 15px;
+    -fx-max-height: 15px;
+}
+
+#cbTextWrap{
+    -fx-alignment: CENTER; /* BOTTOM_RIGHT; */
+    -fx-background-color:rgba(255,255,255,1.0);
+    -fx-pref-height: 25px;
+    -fx-min-height: 25px;
+    -fx-max-height: 25px;
+}
+
+#cbTextWrap .label {
+    -fx-text-overrun: clip;
+}
+
+#buttonFontIncrease{
+    -fx-alignment: CENTER; /* BOTTOM_RIGHT; */
+    -fx-background-color:rgba(255,255,255,1.0);
+    -fx-border-width:1;
+    -fx-border-color: grey;
+    -fx-border-radius: 5;
+    -fx-border-style:hidden solid solid solid; /* Top, Right, Bottom, Left  */
+}
+
+#buttonFontDecrease{
+    -fx-background-color:rgba(255,255,255,1.0);
+    -fx-border-width:1;
+    -fx-border-color: grey;
+    -fx-border-radius: 5;
+    -fx-border-style:hidden solid solid solid; /* Top, Right, Bottom, Left  */
+}
+
+/*  jfxEditorBottom.fxml */
+#vboxBottom{
+    -fx-padding: 0px 5px 0px 5px; /* Top Right Bottom Left (Clockwise)  */
+}
+
+#hboxBottomInfo{
+    -fx-border-width:1;
+    -fx-border-style:solid hidden hidden solid; /* Top, Right, Bottom, Left  */
+    -fx-border-color:lightgrey;
+}
+
+#tfBottomCursorPos{
+    -fx-font-size:11px;
+    -fx-background-color:rgba(0,0,0,0);
+    -fx-border-width:2;
+    -fx-border-style:hidden hidden hidden solid; /* Top, Right, Bottom, Left  */
+    -fx-border-color:lightgrey;
+}
+
+#tfBottomLineEnding{
+    -fx-font-size:11px;
+    -fx-background-color:rgba(0,0,0,0);
+    -fx-border-width:2;
+    -fx-border-style:hidden solid hidden solid; /* Top, Right, Bottom, Left  */
+    -fx-border-color:lightgrey;
+}
+
+#tfBottomCharset {
+    -fx-font-size:11px;
+    -fx-background-color:rgba(0,0,0,0);
+    -fx-border-width:2;
+    -fx-border-style:hidden solid hidden hidden; /* Top, Right, Bottom, Left  */
+    -fx-border-color:lightgrey;
+}
+
+/*  jfxEditorAbout.fxml */
+/*
+It does not work !!!
+#gridPaneAbout{
+    -fx-alignment: CENTER;
+    -fx-hgap: 15px;
+    -fx-vgap: 15px;
+    -fx-padding: 20px;
+}
+*/

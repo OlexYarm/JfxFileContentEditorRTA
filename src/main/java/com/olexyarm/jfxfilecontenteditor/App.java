@@ -61,6 +61,9 @@ public class App extends Application {
 
         SCENE = new Scene(root, Settings.INT_WINDOW_WIDTH, Settings.INT_WINDOW_HIGH);
 
+        String strCssPath = getClass().getResource("fileContentEditor.css").toExternalForm();
+        SCENE.getStylesheets().add(strCssPath);
+
         SCENE.widthProperty().addListener(new ChangeListener<Number>() {
             @Override
             public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {

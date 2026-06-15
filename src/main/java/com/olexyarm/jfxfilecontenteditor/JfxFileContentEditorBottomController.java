@@ -76,10 +76,10 @@ public class JfxFileContentEditorBottomController {
     TextField tfBottomReplace;
 
     @FXML
-    private HBox hboxBottomVersion;
+    private HBox hboxBottomInfo;
 
     @FXML
-    private Label hboxBottomLabelVersion;
+    private Label hboxBottomLabelInfo;
 
     @FXML
     TextField tfBottomCursorPos;
@@ -144,8 +144,8 @@ public class JfxFileContentEditorBottomController {
                 + " tfBottomFind=\"" + this.tfBottomFind + "\""
                 + " hboxBottomReplace=\"" + this.hboxBottomReplace + "\""
                 + " tfBottomReplace=\"" + this.tfBottomReplace + "\""
-                + " hboxBottomVersion=\"" + this.hboxBottomVersion + "\""
-                + " hboxBottomLabelVersion=\"" + this.hboxBottomLabelVersion + "\""
+                + " hboxBottomInfo=\"" + this.hboxBottomInfo + "\""
+                + " hboxBottomLabelInfo=\"" + this.hboxBottomLabelInfo + "\""
                 + " tfBottomCursorPos=\"" + this.tfBottomCursorPos
                 + " tfBottomLineEnding=\"" + this.tfBottomLineEnding + "\""
                 + " tfBottomCharset=\"" + this.tfBottomCharset + "\""
@@ -164,7 +164,7 @@ public class JfxFileContentEditorBottomController {
         this.tabPane = this.jfxEditorController.tabPaneEditor;
         this.lstTabs = this.tabPane.getTabs();
 
-        this.hboxBottomLabelVersion.setText(Settings.STR_APP_TITLE + " " + Settings.STR_VERSION);
+        //TODO: use for something else: this.hboxBottomLabelVersion.setText(Settings.STR_APP_TITLE);
 
         LOGGER.debug("### Setting Parent Controller in JfxFileContentEditorBottomController."
                 + " this=\"" + this + "\""
@@ -173,8 +173,8 @@ public class JfxFileContentEditorBottomController {
                 + " hboxBottomSearchResult=\"" + hboxBottomSearchResult + "\""
                 + " hboxBottomFind=\"" + hboxBottomFind + "\""
                 + " hboxBottomReplace=\"" + hboxBottomReplace + "\""
-                + " hboxBottomVersion=\"" + hboxBottomVersion + "\""
-                + " hboxBottomLabelVersion=\"" + hboxBottomLabelVersion + "\"");
+                + " hboxBottomInfo=\"" + hboxBottomInfo + "\""
+                + " hboxBottomLabelInfo=\"" + hboxBottomLabelInfo + "\"");
     }
 
     // -------------------------------------------------------------------------------------

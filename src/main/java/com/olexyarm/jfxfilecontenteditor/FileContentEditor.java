@@ -145,7 +145,6 @@ class FileContentEditor extends VBox {
     // -------------------------------------------------------------------------------------
     public FileContentEditor(final String strId, final Path pathFile) {
 
-        getStyleClass().add("fileContentEditor.css");
         this.strId = strId;
         this.pathFile = pathFile;
         this.parseFilePath(strId, pathFile);
@@ -209,7 +208,7 @@ class FileContentEditor extends VBox {
                 intCaretPosCharIndexCurrent = textPosCaretPosition.charIndex();
                 if (tfPosCaret != null) {
                     String strCursorPos = "Paragraph:" + intCaretPosParagraphCurrent
-                            + " Offser:" + intCaretPosOffsetCurrent
+                            + " Offset:" + intCaretPosOffsetCurrent
                             + " CharIndex:" + intCaretPosCharIndexCurrent + "";
                     tfPosCaret.setText(strCursorPos);
                     tfPosCaret.setPrefWidth(strCursorPos.length() * 6);

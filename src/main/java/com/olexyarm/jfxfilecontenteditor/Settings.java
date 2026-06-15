@@ -172,7 +172,7 @@ class Settings {
     // -------------------------------------------------------------------------------------
     // Unmodifiable settings
     // -------------------------------------------------------------------------------------
-    public static final String STR_APP_TITLE = "Open JFX File Content Editor";
+    public static String STR_APP_TITLE = "Open JFX File Content Editor";
     public static final String STR_JFX_EDITOR_SETTINGS_DIRECTORY = "JfxEditor";
 
     // -------------------------------------------------------------------------------------
@@ -325,6 +325,8 @@ class Settings {
 
     // -------------------------------------------------------------------------------------
     public static void load() {
+
+        STR_APP_TITLE += " " + STR_VERSION;
 
         Path pathFileSettings = FileSystems.getDefault().getPath(STR_SETTINGS_FILE_PATH);
 
